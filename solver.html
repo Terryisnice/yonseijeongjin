@@ -200,8 +200,8 @@
       <input type="file" accept="image/*" capture="environment" onchange="handleFileSelect(event)" id="fileInput">
       <div id="uploadPlaceholder">
         <div class="upload-icon">📸</div>
-        <p class="upload-text">사진을 클릭하거나 드래그해서 올려주세요</p>
-        <p class="upload-subtext">JPG, PNG, GIF, WEBP · 최대 10MB</p>
+        <p class="upload-text">클릭 · 드래그 · <kbd style="background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px;font-family:var(--mono)">Ctrl+V</kbd> 로 올려주세요</p>
+        <p class="upload-subtext">캡처 후 Ctrl+V가 제일 빠릅니다 · JPG, PNG · 최대 10MB</p>
       </div>
       <div id="previewContainer" style="display:none;">
         <div class="preview-wrap">
@@ -307,6 +307,18 @@
     el.textContent = connected ? '연결됨' : '미연결';
     el.className = 'api-status ' + (connected ? 'connected' : 'disconnected');
   }
+
+  // ── Ctrl+V 클립보드 붙여넣기 ──
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) { processImage(file); break; }
+      }
+    }
+  });
 
   // ── 이미지 처리 ──
   function handleFileSelect(e) {
