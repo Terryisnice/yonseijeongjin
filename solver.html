@@ -402,8 +402,8 @@
     reader.onload = (e) => {
       imageBase64 = e.target.result.split(',')[1];
       document.getElementById('previewImg').src = e.target.result;
-      document.getElementById('uploadPlaceholder').style.display = 'none';
       document.getElementById('previewContainer').style.display = 'block';
+      document.getElementById('uploadArea').style.display = 'none';
       updateSubmitBtn();
     };
     reader.readAsDataURL(file);
@@ -414,8 +414,8 @@
     imageBase64 = null;
     imageMimeType = null;
     document.getElementById('fileInput').value = '';
-    document.getElementById('uploadPlaceholder').style.display = 'block';
     document.getElementById('previewContainer').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
     updateSubmitBtn();
   }
 
