@@ -135,9 +135,25 @@
     .btn-reset { margin-top: 20px; padding: 10px 20px; background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--gray-100); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
     .btn-reset:hover { background: var(--gray-100); }
 
-    /* 모델 선택 */
-    .model-select { padding: 8px 12px; border: 1.5px solid var(--gray-100); border-radius: 8px; font-size: 13px; font-family: var(--sans); color: var(--gray-900); outline: none; cursor: pointer; background: var(--gray-50); }
-    .model-select:focus { border-color: var(--accent); }
+    /* 업로드 버튼 2개 */
+    .upload-btns { display: flex; gap: 10px; margin-bottom: 16px; }
+    .btn-upload { flex: 1; padding: 14px 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid var(--gray-100); display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; background: var(--white); color: var(--gray-600); }
+    .btn-upload:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+    .btn-upload.paste-btn { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+    .btn-upload.paste-btn:hover { background: #dbeafe; }
+    .upload-preview { margin-bottom: 16px; display: none; }
+    .upload-preview.visible { display: block; }
+
+    /* PDF 버튼 */
+    .btn-pdf { margin-top: 12px; padding: 10px 20px; background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--gray-100); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-pdf:hover { background: var(--gray-100); }
+
+    /* 인쇄용 스타일 */
+    @media print {
+      nav, .api-card, .input-card, .btn-reset, .btn-pdf, .loading { display: none !important; }
+      .result-card { box-shadow: none; border: none; }
+      body { background: white; }
+    }
 
     .divider { height: 1px; background: var(--gray-100); margin: 16px 0; }
 
@@ -202,18 +218,25 @@
 
     <!-- 이미지 업로드 -->
     <div class="input-section-title">📷 문제 사진</div>
-    <div class="upload-area" id="uploadArea" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-      <input type="file" accept="image/*" capture="environment" onchange="handleFileSelect(event)" id="fileInput">
-      <div id="uploadPlaceholder">
-        <div class="upload-icon">📸</div>
-        <p class="upload-text">클릭 · 드래그 · <kbd style="background:var(--gray-100);padding:2px 6px;border-radius:4px;font-size:12px;font-family:var(--mono)">Ctrl+V</kbd> 로 올려주세요</p>
-        <p class="upload-subtext">캡처 후 Ctrl+V가 제일 빠릅니다 · JPG, PNG · 최대 10MB</p>
-      </div>
-      <div id="previewContainer" style="display:none;">
-        <div class="preview-wrap">
-          <img id="previewImg" class="preview-img" alt="문제 미리보기">
-          <button class="btn-remove-img" onclick="removeImage(event)">×</button>
-        </div>
+    <div class="upload-btns">
+      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+        <input type="file" accept="image/*" onchange="handleFileSelect(event)" id="fileInput" style="display:none">
+        📁 파일 선택
+      </button>
+      <button class="btn-upload paste-btn" onclick="triggerPaste()">
+        📋 붙여넣기 <kbd style="background:rgba(37,99,235,.15);padding:2px 7px;border-radius:4px;font-size:11px;font-family:var(--mono);margin-left:4px;">Ctrl+V</kbd>
+      </button>
+    </div>
+    <!-- 드래그앤드롭 영역 (작게) -->
+    <div id="uploadArea" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+      style="border:2px dashed var(--gray-100);border-radius:10px;padding:12px;text-align:center;font-size:12px;color:var(--gray-400);margin-bottom:12px;transition:all .2s;">
+      또는 이미지를 여기에 드래그하세요
+    </div>
+    <!-- 미리보기 -->
+    <div id="previewContainer" style="display:none;margin-bottom:12px;">
+      <div class="preview-wrap">
+        <img id="previewImg" class="preview-img" alt="문제 미리보기">
+        <button class="btn-remove-img" onclick="removeImage(event)">×</button>
       </div>
     </div>
 
@@ -247,7 +270,10 @@
       <div class="result-title">풀이 방향 안내</div>
     </div>
     <div class="result-body" id="resultBody"></div>
-    <button class="btn-reset" onclick="resetForm()">↩ 다른 문제 풀기</button>
+    <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-pdf" onclick="savePDF()">📄 PDF로 저장</button>
+      <button class="btn-reset" onclick="resetForm()">↩ 다른 문제 풀기</button>
+    </div>
   </div>
 
 </div>
@@ -312,6 +338,27 @@
     const el = document.getElementById('apiStatus');
     el.textContent = connected ? '연결됨' : '미연결';
     el.className = 'api-status ' + (connected ? 'connected' : 'disconnected');
+  }
+
+  // ── PDF 저장 ──
+  function savePDF() { window.print(); }
+
+  // ── 붙여넣기 버튼 트리거 ──
+  function triggerPaste() {
+    navigator.clipboard.read().then(items => {
+      for (const item of items) {
+        const imgType = item.types.find(t => t.startsWith('image/'));
+        if (imgType) {
+          item.getType(imgType).then(blob => {
+            processImage(new File([blob], 'paste.png', { type: imgType }));
+          });
+          return;
+        }
+      }
+      showError('클립보드에 이미지가 없습니다. 먼저 화면을 캡처(Win+Shift+S)하고 다시 눌러주세요.');
+    }).catch(() => {
+      showError('클립보드 접근 권한이 필요합니다. Ctrl+V를 직접 눌러주세요.');
+    });
   }
 
   // ── Ctrl+V 클립보드 붙여넣기 ──
