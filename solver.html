@@ -199,7 +199,18 @@
     .btn-pdf { margin-top: 12px; padding: 10px 20px; background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--gray-100); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-pdf:hover { background: var(--gray-100); }
 
-    /* 인쇄용 스타일 */
+    /* 히스토리 */
+    .history-card { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; box-shadow: var(--shadow); display: none; }
+    .history-card.visible { display: block; }
+    .history-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item { border: 1px solid var(--gray-100); border-radius: 10px; padding: 12px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; transition: border-color .2s, background .2s; }
+    .history-item:hover { border-color: var(--accent); background: var(--accent-lt); }
+    .history-thumb { width: 64px; height: 64px; border-radius: 6px; object-fit: cover; border: 1px solid var(--gray-100); flex-shrink: 0; background: var(--gray-50); }
+    .history-thumb-placeholder { width: 64px; height: 64px; border-radius: 6px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .history-info { flex: 1; min-width: 0; }
+    .history-date { font-size: 11px; color: var(--gray-400); font-family: var(--mono); margin-bottom: 4px; }
+    .history-preview { font-size: 13px; color: var(--gray-600); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     @media print {
       nav, .api-card, .input-card, .btn-reset, .btn-pdf, .loading, .sticky-problem { display: none !important; }
       .print-problem { display: block !important; margin-bottom: 24px; page-break-inside: avoid; }
@@ -331,6 +342,12 @@
     </div>
   </div>
 
+  <!-- 히스토리 -->
+  <div class="history-card" id="historyCard">
+    <div class="history-title">🕐 최근 풀이 기록</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
   <!-- 로딩 -->
   <div class="loading" id="loadingArea">
     <div class="spinner"></div>
@@ -432,43 +449,7 @@
       updateApiStatus(true);
     }
     updateSubmitBtn();
-
-    // 마지막 결과 복원
-    try {
-      const saved = localStorage.getItem('last_result');
-      if (saved) {
-        const { text, imageSrc, savedAt } = JSON.parse(saved);
-        if (text) {
-          const html = window.marked ? marked.parse(text) : text;
-          document.getElementById('resultBody').innerHTML = html;
-          document.getElementById('resultCard').classList.add('visible');
-          // 저장 시각 표시
-          const notice = document.createElement('p');
-          notice.style.cssText = 'font-size:12px;color:var(--gray-400);margin-bottom:16px;';
-          notice.textContent = `📌 마지막 저장: ${savedAt}`;
-          document.getElementById('resultBody').prepend(notice);
-          // 문제 사진 복원
-          if (imageSrc) {
-            document.getElementById('stickyProblemImg').src = imageSrc;
-            document.getElementById('stickyProblem').classList.add('visible');
-            document.getElementById('modalImg').src = imageSrc;
-            document.getElementById('printProblemImg').src = imageSrc;
-          }
-          // KaTeX 렌더링
-          if (window.renderMathInElement) {
-            setTimeout(() => {
-              renderMathInElement(document.getElementById('resultBody'), {
-                delimiters: [
-                  {left: '$$', right: '$$', display: true},
-                  {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-              });
-            }, 500);
-          }
-        }
-      }
-    } catch(e) { /* 복원 실패 시 무시 */ }
+    renderHistory();
   };
 
   // ── API 키 저장 ──
@@ -698,14 +679,19 @@
         });
       }
 
-      // localStorage에 마지막 결과 저장
+      // 히스토리 저장 (최근 2개, 축소판 사진 포함)
       try {
-        const src = imageBase64 ? `data:${imageMimeType};base64,${imageBase64}` : null;
-        localStorage.setItem('last_result', JSON.stringify({
+        const thumbSrc = await resizeImageForHistory(imageBase64, imageMimeType);
+        const history = JSON.parse(localStorage.getItem('solver_history') || '[]');
+        history.unshift({
           text,
-          imageSrc: src,
+          thumbSrc,
+          progress: document.getElementById('progressInput').value.trim(),
           savedAt: new Date().toLocaleString('ko-KR')
-        }));
+        });
+        // 최근 2개만 유지
+        localStorage.setItem('solver_history', JSON.stringify(history.slice(0, 2)));
+        renderHistory();
       } catch(e) { /* 저장 실패 시 무시 */ }
 
       document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -725,6 +711,77 @@
     }
   }
 
+  // ── 이미지 축소 (히스토리 썸네일용) ──
+  function resizeImageForHistory(base64, mimeType) {
+    return new Promise((resolve) => {
+      if (!base64) { resolve(null); return; }
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 400;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = () => resolve(null);
+      img.src = `data:${mimeType};base64,${base64}`;
+    });
+  }
+
+  // ── 히스토리 렌더링 ──
+  function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('solver_history') || '[]');
+    const card = document.getElementById('historyCard');
+    const list = document.getElementById('historyList');
+    if (history.length === 0) { card.classList.remove('visible'); return; }
+    card.classList.add('visible');
+    list.innerHTML = history.map((item, i) => `
+      <div class="history-item" onclick="loadHistory(${i})">
+        ${item.thumbSrc
+          ? `<img class="history-thumb" src="${item.thumbSrc}" alt="문제">`
+          : `<div class="history-thumb-placeholder">📝</div>`}
+        <div class="history-info">
+          <div class="history-date">${item.savedAt}</div>
+          <div class="history-preview">${item.progress ? `[${item.progress}] ` : ''}${item.text.replace(/[#*>\-`]/g, '').slice(0, 80)}...</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── 히스토리 불러오기 ──
+  function loadHistory(index) {
+    const history = JSON.parse(localStorage.getItem('solver_history') || '[]');
+    const item = history[index];
+    if (!item) return;
+    const html = window.marked ? marked.parse(item.text) : item.text;
+    document.getElementById('resultBody').innerHTML = html;
+    document.getElementById('resultCard').classList.add('visible');
+    // 썸네일을 sticky 패널에 표시
+    if (item.thumbSrc) {
+      document.getElementById('stickyProblemImg').src = item.thumbSrc;
+      document.getElementById('stickyProblem').classList.add('visible');
+      document.getElementById('modalImg').src = item.thumbSrc;
+      document.getElementById('printProblemImg').src = item.thumbSrc;
+    }
+    // 저장 시각 표시
+    const notice = document.createElement('p');
+    notice.style.cssText = 'font-size:12px;color:var(--gray-400);margin-bottom:16px;';
+    notice.textContent = `📌 저장된 풀이: ${item.savedAt}`;
+    document.getElementById('resultBody').prepend(notice);
+    // KaTeX
+    if (window.renderMathInElement) {
+      setTimeout(() => {
+        renderMathInElement(document.getElementById('resultBody'), {
+          delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+          throwOnError: false
+        });
+      }, 300);
+    }
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   // ── 모달 ──
   function openModal() { document.getElementById('imgModal').classList.add('visible'); }
   function closeModal() { document.getElementById('imgModal').classList.remove('visible'); }
@@ -736,7 +793,6 @@
     document.getElementById('stickyProblem').classList.remove('visible');
     document.getElementById('progressInput').value = '';
     removeImage({ stopPropagation: () => {} });
-    localStorage.removeItem('last_result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
