@@ -65,16 +65,14 @@
       padding: 10px 20px;
       display: none;
       flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 4px 16px rgba(15,32,68,.08);
+      gap: 6px;
+      box-shadow: 0 2px 12px rgba(15,32,68,.08);
       max-height: 45vh;
-      transition: max-height .3s cubic-bezier(0.4, 0, 0.2, 1), padding .3s ease;
-      border-radius: 0 0 12px 12px;
+      transition: max-height .3s ease;
     }
     .sticky-problem.visible { display: flex; }
     .sticky-problem.collapsed {
-      max-height: 46px;
-      padding-bottom: 8px;
+      max-height: 52px;
       overflow: hidden;
     }
     .sticky-problem-top {
@@ -83,93 +81,21 @@
       justify-content: space-between;
       cursor: pointer;
       flex-shrink: 0;
-      user-select: none;
-      padding: 2px 0;
     }
-    .sticky-problem-header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sticky-problem-label { font-size: 13px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 4px; }
-    .sticky-problem-subtext { font-size: 11px; color: var(--gray-400); font-weight: 400; }
-    
-    .btn-sticky-toggle {
-      background: var(--accent-lt);
-      color: var(--accent);
-      border: 1px solid rgba(37,99,235,.2);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      user-select: none;
-    }
-    .btn-sticky-toggle:hover {
-      background: var(--accent);
-      color: var(--white);
-    }
-
-    .sticky-img-wrap {
-      position: relative;
-      width: 100%;
-      flex-shrink: 0;
-      transition: opacity .2s ease, visibility .2s ease;
-      overflow: hidden;
-      border-radius: 10px;
-      cursor: zoom-in;
-    }
-    .sticky-problem.collapsed .sticky-img-wrap {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
+    .sticky-problem-label { font-size: 11px; font-family: var(--mono); color: var(--gray-400); text-transform: uppercase; letter-spacing: .1em; }
+    .sticky-problem-hint { font-size: 11px; color: var(--accent); font-weight: 600; }
     .sticky-problem img {
       width: 100%;
-      max-height: 32vh;
+      max-height: 34vh;
       border-radius: 10px;
       border: 1px solid var(--gray-100);
       object-fit: contain;
+      cursor: zoom-in;
       background: var(--gray-50);
-      display: block;
-      transition: transform .2s ease, border-color .2s ease;
+      flex-shrink: 0;
     }
-    .sticky-img-wrap:hover img {
-      transform: scale(1.006);
-      border-color: var(--accent);
-    }
-    .sticky-img-overlay {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      background: rgba(15,32,68,.78);
-      color: var(--white);
-      padding: 5px 11px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      pointer-events: none;
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: background .2s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
-    }
-    .sticky-img-wrap:hover .sticky-img-overlay {
-      background: var(--accent);
-    }
-
     /* fixed 패널 아래에 여백 확보 */
-    .sticky-spacer {
-      display: none;
-      height: 0;
-      transition: height .3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    .sticky-spacer { display: none; height: 0; }
     .sticky-spacer.visible { display: block; }
 
     /* 크롭 모달 */
@@ -185,58 +111,9 @@
     .btn-crop-confirm:hover { background: #1d4ed8; }
     .btn-crop-cancel { padding: 14px 20px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
     .btn-crop-skip { padding: 14px 20px; background: transparent; color: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.15); border-radius: 10px; font-size: 14px; cursor: pointer; }
-
-    /* 이미지 확대 모달 */
-    .img-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.85);
-      backdrop-filter: blur(6px);
-      z-index: 300;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+    .img-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 200; align-items: center; justify-content: center; cursor: zoom-out; }
     .img-modal.visible { display: flex; }
-    .img-modal-content {
-      position: relative;
-      max-width: 92vw;
-      max-height: 92vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .img-modal img {
-      max-width: 92vw;
-      max-height: 88vh;
-      border-radius: 12px;
-      object-fit: contain;
-      box-shadow: 0 12px 40px rgba(0,0,0,.5);
-      cursor: zoom-out;
-    }
-    .img-modal-close {
-      position: absolute;
-      top: -16px;
-      right: -16px;
-      width: 36px;
-      height: 36px;
-      background: var(--white);
-      color: var(--navy);
-      border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,.3);
-      transition: transform .2s, background .2s;
-    }
-    .img-modal-close:hover {
-      transform: scale(1.1);
-      background: var(--gray-100);
-    }
+    .img-modal img { max-width: 90vw; max-height: 90vh; border-radius: 12px; object-fit: contain; }
 
     /* HEADER */
     .page-header { margin-bottom: 28px; }
@@ -497,27 +374,18 @@
 
   <!-- 문제 사진 상단 고정 패널 -->
   <div class="sticky-problem" id="stickyProblem">
-    <div class="sticky-problem-top" onclick="toggleStickyProblem(event)">
-      <div class="sticky-problem-header-left">
-        <span class="sticky-problem-label">📷 문제 사진</span>
-        <span class="sticky-problem-subtext">(사진을 누르면 크게 볼 수 있어요)</span>
-      </div>
-      <button type="button" class="btn-sticky-toggle" id="stickyToggleHint">접기 ▲</button>
+    <div class="sticky-problem-top" onclick="toggleStickyProblem()">
+      <div class="sticky-problem-label">📷 문제 사진</div>
+      <span class="sticky-problem-hint" id="stickyToggleHint">접기 ▲</span>
     </div>
-    <div class="sticky-img-wrap" onclick="openModal()">
-      <img id="stickyProblemImg" alt="문제 사진">
-      <div class="sticky-img-overlay">🔍 크게 보기</div>
-    </div>
+    <img id="stickyProblemImg" alt="문제 사진" onclick="openModal()">
   </div>
   <!-- fixed 패널 높이만큼 여백 -->
   <div class="sticky-spacer" id="stickySpacer"></div>
 
   <!-- 이미지 확대 모달 -->
   <div class="img-modal" id="imgModal" onclick="closeModal()">
-    <div class="img-modal-content" onclick="event.stopPropagation()">
-      <button class="img-modal-close" onclick="closeModal()" title="닫기">✕</button>
-      <img id="modalImg" alt="문제 사진 확대" onclick="closeModal()">
-    </div>
+    <img id="modalImg" alt="문제 사진 확대">
   </div>
 
   <!-- 결과 -->
@@ -833,8 +701,7 @@
 
   // ── sticky 패널 토글 (접기/펼치기) ──
   let stickyCollapsed = false;
-  function toggleStickyProblem(e) {
-    if (e && e.target && e.target.closest('.sticky-img-wrap')) return;
+  function toggleStickyProblem() {
     stickyCollapsed = !stickyCollapsed;
     const panel = document.getElementById('stickyProblem');
     const hint = document.getElementById('stickyToggleHint');
@@ -847,27 +714,15 @@
     const panel = document.getElementById('stickyProblem');
     const spacer = document.getElementById('stickySpacer');
     if (panel.classList.contains('visible')) {
-      spacer.classList.add('visible');
-      requestAnimationFrame(() => {
-        spacer.style.height = panel.offsetHeight + 'px';
-      });
       setTimeout(() => {
-        if (panel.classList.contains('visible')) {
-          spacer.style.height = panel.offsetHeight + 'px';
-        }
-      }, 310);
+        spacer.style.height = panel.offsetHeight + 'px';
+        spacer.classList.add('visible');
+      }, 320);
     } else {
       spacer.style.height = '0';
       spacer.classList.remove('visible');
     }
   }
-
-  window.addEventListener('resize', () => {
-    const panel = document.getElementById('stickyProblem');
-    if (panel && panel.classList.contains('visible')) {
-      updateStickySpacerHeight();
-    }
-  });
 
   // ── 모달 ──
   function openModal() { document.getElementById('imgModal').classList.add('visible'); }
