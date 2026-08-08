@@ -13,13 +13,19 @@
 - [x] GitHub 연동 (Terryisnice/yonseijeongjin, main 브랜치)
 - [x] 구글 서치콘솔 등록 + sitemap.xml 제출
 
+### 브랜드 업데이트
+- [x] 브랜드명 YK정진수학으로 변경 (Y=Yonsei, K=Korea)
+- [x] 메인 카피 → "풀이가 맞아야 실력입니다"
+- [x] 서브 카피 → "맞은 문제도 틀린 문제도, 모든 풀이를 검토합니다"
+- [x] 수업 특징 카드 교체 (맞은 문제 풀이 검토 + 틀린 문제 단계별 힌트)
+- [x] 수강료 섹션 → 상담 후 안내로 변경 (가격 비공개)
+
 ### 풀이봇 (solver.html)
 - [x] Gemini API 연동 (학생 본인 키 입력)
 - [x] 사진 업로드 (파일/카메라/Ctrl+V/드래그앤드롭)
 - [x] 이미지 크롭 (Cropper.js)
 - [x] 김태경 선생님 시스템 프롬프트 탑재
-- [x] KaTeX 수식 렌더링
-- [x] marked.js 마크다운 파싱
+- [x] KaTeX 수식 렌더링 + marked.js 마크다운 파싱
 - [x] 문제 사진 상단 sticky 고정
 - [x] 사진 탭 시 확대 모달
 - [x] PDF 저장
@@ -36,13 +42,15 @@
 - [x] PDF 저장
 
 ### 문서
-- [x] docs/prd.md 작성
+- [x] docs/strategy.md 작성 (브랜드 철학 + 상위 전략)
+- [x] docs/prd.md 작성 (핵심 서비스 철학 + 기능 정의)
 - [x] docs/todo.md 작성
 
 ---
 
 ## 🔄 진행 중 / 확인 필요
 
+- [ ] 고양교육지원청 교습비 상한액 확인 (031-900-2894) → 확인 후 수강료 정찰제 공개
 - [ ] solver.html sticky 문제 사진 가로폭 불일치 최종 확인
 - [ ] grader.html 실제 학생 테스트 (손글씨 인식 확인)
 - [ ] 히스토리 localStorage 용량 초과 시 에러 처리
