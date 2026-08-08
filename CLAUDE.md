@@ -41,7 +41,7 @@
 git add .
 git commit -m "커밋 메시지"
 git push
-→ Netlify 자동 배포 (main 브랜치)
+→ Vercel 자동 배포 (main 브랜치)
 ```
 
 **파일 구조:**
@@ -99,7 +99,7 @@ Gemini API 키는 절대 코드에 직접 쓰지 않는다.
 🧪 확인 방법:
 - [사용자가 직접 테스트해야 할 것]
 
-git push 완료 → Netlify 자동 배포 중
+git push 완료 → Vercel 자동 배포 중
 ```
 
 ---

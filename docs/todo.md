@@ -9,7 +9,9 @@
 
 ### 기반 세팅
 - [x] index.html 메인 페이지 제작 (선생님 사진, 소개, 수강료, 성과)
-- [x] Netlify 배포 (yonseijeongjinmath.netlify.app)
+- [x] Vercel 배포 (yonseijeongjin.vercel.app) + 구글 서치콘솔 등록
+- [x] sitemap.xml 제출 (3페이지: index, solver, grader)
+- [x] Netlify → Vercel 전환 완료
 - [x] GitHub 연동 (Terryisnice/yonseijeongjin, main 브랜치)
 - [x] 구글 서치콘솔 등록 + sitemap.xml 제출
 

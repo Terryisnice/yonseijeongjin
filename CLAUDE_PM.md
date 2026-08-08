@@ -106,8 +106,8 @@ Builder(가운데 Claude Code)에 그대로 붙여넣을 수 있게 작성한다
 **메인 카피:** "풀이가 맞아야 실력입니다"
 **핵심 철학:** 맞은 문제도 틀린 문제도 모든 풀이를 검토한다
 **현재 단계:** 방향 A (재원생 모집 + AI 도구 검증)
-**기술 스택:** HTML 단일 파일 + Gemini API + Netlify
-**배포:** git push → Netlify 자동 배포 (main 브랜치)
+**기술 스택:** HTML 단일 파일 + Gemini API + Vercel
+**배포:** git push → Vercel 자동 배포 (main 브랜치)
 
 **파일 구조:**
 ```
