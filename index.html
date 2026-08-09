@@ -153,6 +153,7 @@
     .btn-kakao-lg:hover { opacity: .9; transform: translateY(-2px); }
     .btn-kakao-lg svg { width: 22px; height: 22px; }
     .cta-note { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,.4); }
+    .floating-ai-btn { display: none; }
     footer { background: var(--gray-900); padding: 48px 0 32px; }
     .footer-inner { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 24px; flex-wrap: wrap; gap: 32px; }
     .footer-brand p { font-size: 13px; color: rgba(255,255,255,.4); max-width: 300px; line-height: 1.6; margin-top: 10px; }
@@ -170,6 +171,25 @@
       .method-visual { display: none; }
       .nav-links { display: none; }
       .footer-inner { flex-direction: column; }
+      .floating-ai-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 200;
+        background: var(--accent);
+        color: var(--white);
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 700;
+        padding: 14px 20px;
+        border-radius: 999px;
+        border: none;
+        text-decoration: none;
+        box-shadow: var(--shadow-lg);
+      }
     }
   </style>
 </head>
@@ -489,6 +509,8 @@
       <p class="footer-copy">© 2026 YK정진수학 · 김태경. All rights reserved.</p>
     </div>
   </footer>
+
+  <a href="#services" class="floating-ai-btn">🤖 AI 도구 바로가기</a>
 
 </body>
 </html>
