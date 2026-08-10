@@ -817,7 +817,17 @@
           savedAt: new Date().toLocaleString('ko-KR')
         });
         // 최근 2개만 유지
-        localStorage.setItem('solver_history', JSON.stringify(history.slice(0, 2)));
+        const trimmedHistory = history.slice(0, 2);
+        try {
+          localStorage.setItem('solver_history', JSON.stringify(trimmedHistory));
+        } catch (storageErr) {
+          try {
+            // 저장 공간 부족 시 최근 1개만으로 재시도
+            localStorage.setItem('solver_history', JSON.stringify(trimmedHistory.slice(0, 1)));
+          } catch (retryErr) {
+            showError('저장 공간이 부족해 히스토리를 저장하지 못했습니다.');
+          }
+        }
         renderHistory();
       } catch(e) { /* 저장 실패 시 무시 */ }
 
