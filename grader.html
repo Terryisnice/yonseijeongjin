@@ -88,6 +88,14 @@
     .api-hint { margin-top: 10px; font-size: 12px; color: var(--gray-400); line-height: 1.6; }
     .api-hint a { color: var(--accent); text-decoration: none; }
 
+    /* 학습 범위 카드 */
+    .curr-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .curr-btn { flex: 1; padding: 10px 12px; border: 1.5px solid var(--gray-100); border-radius: 8px; background: var(--gray-50); color: var(--gray-600); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .curr-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .curr-btn.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+    .subject-select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-100); border-radius: 8px; font-size: 14px; font-family: var(--sans); color: var(--gray-900); outline: none; cursor: pointer; background: var(--gray-50); transition: border-color .2s; }
+    .subject-select:focus { border-color: var(--accent); background: var(--white); }
+
     /* INPUT CARD */
     .input-card { background: var(--white); border: 1px solid var(--gray-100); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow); }
     .input-section-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
@@ -274,6 +282,19 @@
     <p class="api-hint">풀이봇과 같은 API 키를 사용합니다. <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>에서 무료 발급.</p>
   </div>
 
+  <!-- 학습 범위 설정 -->
+  <div class="api-card" id="curriculumCard">
+    <div class="api-card-header">
+      <div class="api-card-title">📚 학습 범위</div>
+    </div>
+    <div class="curr-toggle" id="currToggle">
+      <button type="button" class="curr-btn" data-curr="2015" onclick="selectCurriculum('2015')">2015개정</button>
+      <button type="button" class="curr-btn" data-curr="2022" onclick="selectCurriculum('2022')">2022개정</button>
+    </div>
+    <select class="subject-select" id="subjectSelect" onchange="saveCurriculumSelection()"></select>
+    <p class="api-hint">선택한 과목까지 학습한 것으로 가정하고, 그 범위 안에서 채점 코멘트를 안내합니다.</p>
+  </div>
+
   <!-- 입력 카드 -->
   <div class="input-card">
 
@@ -380,11 +401,70 @@
 - 수식은 LaTeX 형식으로 ($...$, $$...$$)
 - 마크다운 형식으로 작성`;
 
+  // ── 교육과정 · 과목 데이터 ──
+  const CURRICULUM_SUBJECTS = {
+    '2015': [
+      { id: 'common',   label: '공통수학(중등 포함)', cumulative: ['공통수학(중등 포함)'] },
+      { id: 'math1',    label: '수1',   cumulative: ['공통수학(중등 포함)', '수1'] },
+      { id: 'math2',    label: '수2',   cumulative: ['공통수학(중등 포함)', '수1', '수2'] },
+      { id: 'probstat', label: '확통',  cumulative: ['공통수학(중등 포함)', '수1', '수2', '확통'] },
+      { id: 'calculus', label: '미적분', cumulative: ['공통수학(중등 포함)', '수1', '수2', '미적분'] },
+      { id: 'geometry', label: '기하',  cumulative: ['공통수학(중등 포함)', '수1', '수2', '기하'] }
+    ],
+    '2022': [
+      { id: 'common',   label: '공통수학1·2', cumulative: ['공통수학1·2'] },
+      { id: 'algebra',  label: '대수',       cumulative: ['공통수학1·2', '대수'] },
+      { id: 'calc1',    label: '미적분Ⅰ',    cumulative: ['공통수학1·2', '대수', '미적분Ⅰ'] },
+      { id: 'probstat', label: '확률과통계',  cumulative: ['공통수학1·2', '대수', '확률과통계'] },
+      { id: 'calc2',    label: '미적분Ⅱ',    cumulative: ['공통수학1·2', '대수', '미적분Ⅰ', '미적분Ⅱ'] },
+      { id: 'geometry', label: '기하',       cumulative: ['공통수학1·2', '대수', '기하'] }
+    ]
+  };
+
   // ── 상태 ──
   let imageBase64 = null;
   let imageMimeType = null;
   let apiKey = localStorage.getItem('gemini_api_key') || '';
   let cropper = null;
+  let curriculum = localStorage.getItem('yk_curriculum') || '2015';
+  let subjectId = localStorage.getItem('yk_subject') || CURRICULUM_SUBJECTS[curriculum][0].id;
+
+  // ── 교육과정/과목 선택 ──
+  function selectCurriculum(curr) {
+    curriculum = curr;
+    document.querySelectorAll('.curr-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.curr === curr));
+    if (!CURRICULUM_SUBJECTS[curriculum].find(s => s.id === subjectId)) {
+      subjectId = CURRICULUM_SUBJECTS[curriculum][0].id;
+    }
+    renderSubjectSelect();
+    saveCurriculumSelection();
+  }
+
+  function renderSubjectSelect() {
+    const select = document.getElementById('subjectSelect');
+    select.innerHTML = CURRICULUM_SUBJECTS[curriculum]
+      .map(s => `<option value="${s.id}" ${s.id === subjectId ? 'selected' : ''}>${s.label}</option>`)
+      .join('');
+  }
+
+  function saveCurriculumSelection() {
+    subjectId = document.getElementById('subjectSelect').value;
+    localStorage.setItem('yk_curriculum', curriculum);
+    localStorage.setItem('yk_subject', subjectId);
+  }
+
+  function getLearningScopeText() {
+    const subjects = CURRICULUM_SUBJECTS[curriculum];
+    const subject = subjects.find(s => s.id === subjectId) || subjects[0];
+    const currLabel = curriculum === '2015' ? '2015개정' : '2022개정';
+    return `[학생 정보]
+이 학생은 ${currLabel} 교육과정 기준으로 ${subject.cumulative.join(', ')}까지 학습한 것으로 가정합니다.
+
+[채점 지침 추가]
+- 위 학습 범위를 벗어나는 개념·공식·풀이법을 "올바른 방향 안내"나 "추천 풀이"에서 사용하지 마세요. (예: 기하를 아직 배우지 않았다면 벡터/좌표기하 방식으로 안내하지 말 것)
+- 더 상위 단원의 도구로 "더 쉽게" 풀리는 경우라도, 학생의 학습 범위를 벗어난 방법은 제시하지 마세요.
+- 학생의 학습 범위 안에서 이해 가능한 개념과 방법으로만 안내하세요.`;
+  }
 
   // ── 초기화 ──
   window.onload = () => {
@@ -392,6 +472,9 @@
       document.getElementById('apiKeyInput').value = apiKey;
       updateApiStatus(true);
     }
+    const currBtn = document.querySelector(`.curr-btn[data-curr="${curriculum}"]`);
+    if (currBtn) currBtn.classList.add('active');
+    renderSubjectSelect();
     updateSubmitBtn();
   };
 
@@ -510,7 +593,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT + '\n\n' + getLearningScopeText() }] },
             contents: [{
               role: 'user',
               parts: [
