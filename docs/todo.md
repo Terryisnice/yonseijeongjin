@@ -43,6 +43,10 @@
 - [x] 문제 사진 sticky 고정
 - [x] PDF 저장
 
+### UI/UX 개선
+- [x] index.html 모바일에서 선생님 사진 카드 노출
+- [x] index.html 모바일 AI 도구 바로가기 플로팅 버튼 추가
+
 ### 문서
 - [x] docs/strategy.md 작성 (브랜드 철학 + 상위 전략)
 - [x] docs/prd.md 작성 (핵심 서비스 철학 + 기능 정의)
