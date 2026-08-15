@@ -124,6 +124,15 @@
     .api-hint { margin-top: 10px; font-size: 12px; color: var(--gray-400); line-height: 1.6; }
     .api-hint a { color: var(--accent); text-decoration: none; }
     .api-hint a:hover { text-decoration: underline; }
+    .api-key-row { margin-bottom: 8px; align-items: center; }
+    .api-key-row:last-child { margin-bottom: 0; }
+    .api-key-index { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; background: var(--gray-100); color: var(--gray-600); font-size: 11px; font-weight: 700; font-family: var(--mono); border-radius: 50%; }
+    .btn-remove-key { flex-shrink: 0; width: 34px; height: 34px; background: var(--gray-50); border: 1.5px solid var(--gray-100); border-radius: 8px; color: var(--gray-400); font-size: 14px; cursor: pointer; transition: color .2s, border-color .2s; }
+    .btn-remove-key:hover { color: var(--accent); border-color: var(--accent); }
+    .api-key-toolbar { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-add-key { padding: 10px 16px; background: var(--white); color: var(--accent); border: 1.5px dashed var(--accent); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .btn-add-key:hover { background: var(--accent-lt); }
+    .api-key-switch-notice { margin-top: 10px; padding: 8px 12px; background: #FBF3E4; border: 1px solid var(--gold); border-radius: 8px; font-size: 12px; color: #8A6417; }
 
     /* 학습 범위 카드 */
     .curr-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -297,12 +306,14 @@
       </div>
       <span class="api-status disconnected" id="apiStatus">미연결</span>
     </div>
-    <div class="api-input-row">
-      <input type="password" class="api-input" id="apiKeyInput" placeholder="Gemini API 키를 입력하세요 (AIza... 또는 AQ...)" autocomplete="off">
-      <button class="btn-save" onclick="saveApiKey()">저장</button>
+    <div id="apiKeyList"></div>
+    <div class="api-key-toolbar">
+      <button type="button" class="btn-add-key" onclick="addApiKeyRow()">+ 키 추가</button>
+      <button class="btn-save" onclick="saveApiKeys()">저장</button>
     </div>
+    <p class="api-key-switch-notice" id="apiKeySwitchNotice" style="display:none;"></p>
     <p class="api-hint">
-      API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다.<br>
+      API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다. 여러 개 등록하면 할당량 초과 시 자동으로 다음 키로 전환됩니다.<br>
       키가 없으면 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>에서 무료로 발급받으세요.
     </p>
   </div>
@@ -330,6 +341,7 @@
         <option value="gemini-3.6-flash">Gemini 3.6 Flash (추천)</option>
         <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (경량)</option>
         <option value="gemini-2.5-flash">Gemini 2.5 Flash (안정)</option>
+        <option value="gemini-3.7-flash">Gemini 3.7 Flash (최신)</option>
       </select>
     </div>
 
@@ -509,7 +521,24 @@
   // ── 상태 ──
   let imageBase64 = null;
   let imageMimeType = null;
-  let apiKey = localStorage.getItem('gemini_api_key') || '';
+  function loadApiKeys() {
+    try {
+      const stored = localStorage.getItem('gemini_api_keys');
+      if (stored) {
+        const arr = JSON.parse(stored);
+        if (Array.isArray(arr)) {
+          const cleaned = arr.map(k => (k || '').trim()).filter(Boolean);
+          if (cleaned.length) return cleaned;
+        }
+      }
+    } catch (e) { /* 손상된 저장값은 무시 */ }
+    // 기존 단일 키 저장값 마이그레이션
+    const legacy = (localStorage.getItem('gemini_api_key') || '').trim();
+    return legacy ? [legacy] : [];
+  }
+
+  let apiKeys = loadApiKeys();
+  let currentKeyIndex = 0;
   let curriculum = localStorage.getItem('yk_curriculum') || '2015';
   let subjectId = localStorage.getItem('yk_subject') || CURRICULUM_SUBJECTS[curriculum][0].id;
   let qaContext = null; // { contents: [...] } — 현재 결과에 대한 대화 맥락
@@ -559,10 +588,8 @@
 
   // ── 초기화 ──
   window.onload = () => {
-    if (apiKey) {
-      document.getElementById('apiKeyInput').value = apiKey;
-      updateApiStatus(true);
-    }
+    renderApiKeyRows(apiKeys);
+    if (apiKeys.length) updateApiStatus(true);
     const currBtn = document.querySelector(`.curr-btn[data-curr="${curriculum}"]`);
     if (currBtn) currBtn.classList.add('active');
     renderSubjectSelect();
@@ -570,13 +597,46 @@
     renderHistory();
   };
 
-  // ── API 키 저장 ──
-  function saveApiKey() {
-    const val = document.getElementById('apiKeyInput').value.trim();
-    if (!val) { showError('API 키를 입력해주세요.'); return; }
-    if (!val.startsWith('AIza') && !val.startsWith('AQ.')) { showError('유효한 Gemini API 키가 아닙니다. AIza 또는 AQ.로 시작해야 합니다.'); return; }
-    apiKey = val;
-    localStorage.setItem('gemini_api_key', val);
+  // ── API 키 다중 등록 ──
+  function renderApiKeyRows(values) {
+    const list = document.getElementById('apiKeyList');
+    const rows = (values && values.length) ? values : [''];
+    list.innerHTML = rows.map((k, i) => `
+      <div class="api-input-row api-key-row">
+        <span class="api-key-index">${i + 1}</span>
+        <input type="password" class="api-input" placeholder="Gemini API 키 ${i + 1} (AIza... 또는 AQ...)" autocomplete="off" value="${escapeHtml(k || '')}">
+        ${rows.length > 1 ? `<button type="button" class="btn-remove-key" title="키 삭제" onclick="removeApiKeyRow(${i})">✕</button>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function getApiKeyRowValues() {
+    return Array.from(document.querySelectorAll('#apiKeyList input')).map(inp => inp.value);
+  }
+
+  function addApiKeyRow() {
+    const values = getApiKeyRowValues();
+    values.push('');
+    renderApiKeyRows(values);
+  }
+
+  function removeApiKeyRow(index) {
+    const values = getApiKeyRowValues();
+    values.splice(index, 1);
+    renderApiKeyRows(values.length ? values : ['']);
+  }
+
+  function saveApiKeys() {
+    const values = getApiKeyRowValues().map(v => v.trim()).filter(Boolean);
+    if (!values.length) { showError('API 키를 최소 1개 입력해주세요.'); return; }
+    const invalid = values.find(v => !v.startsWith('AIza') && !v.startsWith('AQ.'));
+    if (invalid) { showError('유효한 Gemini API 키가 아닙니다. AIza 또는 AQ.로 시작해야 합니다.'); return; }
+    apiKeys = values;
+    currentKeyIndex = 0;
+    localStorage.setItem('gemini_api_keys', JSON.stringify(apiKeys));
+    localStorage.setItem('gemini_api_key', apiKeys[0]);
+    renderApiKeyRows(apiKeys);
+    hideKeySwitchNotice();
     updateApiStatus(true);
     hideError();
     updateSubmitBtn();
@@ -584,8 +644,56 @@
 
   function updateApiStatus(connected) {
     const el = document.getElementById('apiStatus');
-    el.textContent = connected ? '연결됨' : '미연결';
+    if (connected && apiKeys.length > 1) {
+      el.textContent = `연결됨 · ${currentKeyIndex + 1}/${apiKeys.length}번 키 사용중`;
+    } else {
+      el.textContent = connected ? '연결됨' : '미연결';
+    }
     el.className = 'api-status ' + (connected ? 'connected' : 'disconnected');
+  }
+
+  function showKeySwitchNotice(fromIndex, toIndex) {
+    const el = document.getElementById('apiKeySwitchNotice');
+    el.textContent = `⚠️ ${fromIndex + 1}번 키 할당량 초과 → ${toIndex + 1}번 키로 전환했어요.`;
+    el.style.display = 'block';
+    updateApiStatus(true);
+  }
+
+  function hideKeySwitchNotice() {
+    document.getElementById('apiKeySwitchNotice').style.display = 'none';
+  }
+
+  // ── Gemini API 호출 (429 시 자동으로 다음 키로 전환) ──
+  async function callGeminiApi(model, payload) {
+    if (!apiKeys.length) throw new Error('API_KEY_MISSING');
+    for (let attempt = 0; attempt < apiKeys.length; attempt++) {
+      const key = apiKeys[currentKeyIndex];
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      if (response.status === 429) {
+        if (attempt < apiKeys.length - 1) {
+          const fromIndex = currentKeyIndex;
+          currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+          showKeySwitchNotice(fromIndex, currentKeyIndex);
+          continue;
+        }
+        throw new Error('QUOTA_EXCEEDED');
+      }
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `API 오류 (${response.status})`);
+      }
+
+      return await response.json();
+    }
   }
 
   // ── PDF 저장 ──
@@ -720,7 +828,7 @@
 
   // ── 제출 버튼 활성화 ──
   function updateSubmitBtn() {
-    const hasKey = !!apiKey;
+    const hasKey = apiKeys.length > 0;
     const hasImage = !!imageBase64;
     document.getElementById('submitBtn').disabled = !(hasKey && hasImage);
   }
@@ -741,32 +849,18 @@
       : `문제 사진을 분석해주세요. 학생이 어떻게 접근해야 할지 순방향/역방향으로 안내해주세요.`;
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT + '\n\n' + getLearningScopeText() }] },
-            contents: [{
-              role: 'user',
-              parts: [
-                { inline_data: { mime_type: imageMimeType, data: imageBase64 } },
-                { text: userText }
-              ]
-            }],
-            generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
-          })
-        }
-      );
+      const data = await callGeminiApi(model, {
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT + '\n\n' + getLearningScopeText() }] },
+        contents: [{
+          role: 'user',
+          parts: [
+            { inline_data: { mime_type: imageMimeType, data: imageBase64 } },
+            { text: userText }
+          ]
+        }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
+      });
 
-      if (!response.ok) {
-        const err = await response.json();
-        const msg = err?.error?.message || `API 오류 (${response.status})`;
-        throw new Error(msg);
-      }
-
-      const data = await response.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new Error('응답을 받지 못했습니다. 다시 시도해주세요.');
 
@@ -959,7 +1053,7 @@
     if (!qaContext) { showError('먼저 문제를 풀이해주세요.'); return; }
     const question = document.getElementById('qaInput').value.trim();
     if (!question) { showError('질문을 입력해주세요.'); return; }
-    if (!apiKey) { showError('Gemini API 키를 먼저 저장해주세요.'); return; }
+    if (!apiKeys.length) { showError('Gemini API 키를 먼저 저장해주세요.'); return; }
 
     const model = document.getElementById('modelSelect').value;
     const requestContents = [...qaContext.contents, { role: 'user', parts: [{ text: question }] }];
@@ -969,25 +1063,12 @@
     document.getElementById('qaLoading').classList.add('visible');
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT + '\n\n' + getLearningScopeText() }] },
-            contents: requestContents,
-            generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
-          })
-        }
-      );
+      const data = await callGeminiApi(model, {
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT + '\n\n' + getLearningScopeText() }] },
+        contents: requestContents,
+        generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
+      });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err?.error?.message || `API 오류 (${response.status})`);
-      }
-
-      const data = await response.json();
       const answerText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!answerText) throw new Error('응답을 받지 못했습니다. 다시 시도해주세요.');
 
