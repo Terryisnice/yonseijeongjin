@@ -289,7 +289,7 @@
       <span class="api-status disconnected" id="apiStatus">미연결</span>
     </div>
     <div class="api-input-row">
-      <input type="password" class="api-input" id="apiKeyInput" placeholder="Gemini API 키 (AIza...)" autocomplete="off">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="Gemini API 키 (AIza... 또는 AQ...)" autocomplete="off">
       <button class="btn-save" onclick="saveApiKey()">저장</button>
     </div>
     <p class="api-hint">풀이봇과 같은 API 키를 사용합니다. <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>에서 무료 발급.</p>
@@ -512,7 +512,7 @@
   // ── API 키 ──
   function saveApiKey() {
     const val = document.getElementById('apiKeyInput').value.trim();
-    if (!val || !val.startsWith('AIza')) { showError('유효한 Gemini API 키가 아닙니다.'); return; }
+    if (!val || (!val.startsWith('AIza') && !val.startsWith('AQ.'))) { showError('유효한 Gemini API 키가 아닙니다.'); return; }
     apiKey = val;
     localStorage.setItem('gemini_api_key', val);
     updateApiStatus(true);
