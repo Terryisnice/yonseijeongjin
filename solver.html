@@ -1091,6 +1091,10 @@
 ${solutionText}
 
 주의사항:
+- 가장 먼저, 이 문제를 그래프로 시각화하는 것이 학생의 이해에 실제로 도움이 되는지 판단해 is_graph_helpful에 표시하세요. 함수의 개형/증가감소/극값/근/그래프 형태 등을 다루는 문제라면 true입니다. 여러 함수 f, g, h 사이의 관계식을 논리적으로 추론하는 문제, 집합/경우의 수/확률 문제 등 그래프로 그릴 핵심 함수가 없거나 그래프가 오히려 불필요한 문제라면 false로 하세요.
+- reason 필드에 그 판단 이유를 한 줄로 간단히 쓰세요.
+- is_graph_helpful이 false이면 다른 필드는 채우지 않아도 됩니다.
+- is_graph_helpful이 true일 때만 아래 필드들을 계속 채우세요.
 - 먼저 함수식에 x 이외의 미지수(파라미터, 예: a, k, m)가 포함되어 있는지 판단해 has_parameter에 표시하세요.
 - 미지수가 없으면 has_parameter를 false로 하고, function_label/function_expr/domain_min/domain_max/domain_label 필드를 채우세요.
 - 미지수가 있으면 has_parameter를 true로 하세요. 이 경우 특정 값을 대입하거나 "극값이 있는지/없는지" 같은 판단을 당신이 직접 내리지 마세요. 그 판단은 학생이 슬라이더로 직접 값을 바꿔가며 화면에서 계산된 결과로 확인합니다. 대신 아래 필드만 채우세요:
@@ -1112,6 +1116,8 @@ ${solutionText}
     const responseSchema = {
       type: 'OBJECT',
       properties: {
+        is_graph_helpful: { type: 'BOOLEAN', description: '이 문제를 그래프로 시각화하는 것이 학생 이해에 실제로 도움이 되면 true, 그래프로 그릴 핵심 함수가 없거나 불필요하면 false' },
+        reason: { type: 'STRING', description: 'is_graph_helpful 판단 이유를 한 줄로' },
         has_parameter: { type: 'BOOLEAN', description: '함수식에 x 이외의 미지수(파라미터, 예: a, k)가 포함되어 있으면 true' },
         function_label: { type: 'STRING', description: 'has_parameter가 false일 때 사용. LaTeX 문법 없이 일반 텍스트로 쓴 함수식 표기, 예: f(x) = (x^2 - x + 1)/e^x' },
         function_expr: { type: 'STRING', description: 'has_parameter가 false일 때 사용. x에 대한 JS 수식, 예: x**2 - 4*x + 3' },
@@ -1126,7 +1132,7 @@ ${solutionText}
         param_default: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 초기값(문제에서 다루는 대표적인 값)' },
         param_step: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 이동 간격, 예: 0.1' }
       },
-      required: ['has_parameter']
+      required: ['is_graph_helpful']
     };
 
     try {
@@ -1204,7 +1210,19 @@ ${solutionText}
     `;
   }
 
+  function renderGraphNotHelpful(info) {
+    graphCardEl.innerHTML = `
+      <div class="graph-beta-badge">🧪 베타 · 그래프</div>
+      <div class="graph-info">이 문제는 그래프로 설명하기보다 논리적 관계를 따라가는 게 더 맞는 문제예요.${info.reason ? `<br>${escapeHtml(info.reason)}` : ''}</div>
+    `;
+  }
+
   function renderGraphResult(info) {
+    if (info && info.is_graph_helpful === false) {
+      renderGraphNotHelpful(info);
+      return;
+    }
+
     if (info && info.has_parameter) {
       renderGraphParamSlider(info);
       return;
