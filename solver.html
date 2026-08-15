@@ -186,6 +186,10 @@
     .qa-card { background: var(--accent-lt); border: 1px solid var(--accent); border-radius: 10px; padding: 16px 18px; margin-top: 16px; }
     .qa-question { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
     .qa-input-row { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gray-100); }
+    .qa-quote-ref { display: none; align-items: flex-start; gap: 8px; background: var(--accent-lt); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; font-size: 13px; color: var(--navy); }
+    .qa-quote-text { flex: 1; line-height: 1.5; }
+    .qa-quote-close { flex-shrink: 0; background: none; border: none; color: var(--navy); opacity: .6; cursor: pointer; font-size: 13px; padding: 0 2px; }
+    .qa-quote-close:hover { opacity: 1; }
     .qa-textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-100); border-radius: 8px; font-size: 14px; font-family: var(--sans); color: var(--gray-900); resize: vertical; min-height: 70px; outline: none; transition: border-color .2s; line-height: 1.6; margin-bottom: 10px; }
     .qa-textarea:focus { border-color: var(--accent); }
     .qa-textarea::placeholder { color: var(--gray-400); }
@@ -474,6 +478,10 @@
         <button type="button" class="qa-chip" id="graphChipBtn" style="display:none;" onclick="requestGraphExplanation()">📊 이 문제를 그래프로 설명해주세요</button>
       </div>
       <div class="qa-input-row">
+        <div class="qa-quote-ref" id="qaQuoteRef">
+          <span class="qa-quote-text" id="qaQuoteText"></span>
+          <button type="button" class="qa-quote-close" id="qaQuoteClose" onclick="clearQaQuote()" aria-label="인용 취소">✕</button>
+        </div>
         <textarea class="qa-textarea" id="qaInput" placeholder="풀이에 대해 궁금한 점을 질문해보세요."></textarea>
         <button class="btn-qa-submit" id="qaSubmitBtn" onclick="submitFollowUp()">💬 질문하기</button>
         <p class="qa-loading" id="qaLoading">답변을 생각하는 중...</p>
@@ -986,6 +994,7 @@
     qaContext = null;
     document.getElementById('qaList').innerHTML = '';
     document.getElementById('qaInput').value = '';
+    clearQaQuote();
     graphCardEl = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -996,8 +1005,20 @@
     if (!qaContext) { showError('먼저 문제를 풀이해주세요.'); return; }
     const question = document.getElementById('qaInput').value.trim();
     if (!question) { showError('질문을 입력해주세요.'); return; }
-    const ok = await askFollowUp(question);
-    if (ok) document.getElementById('qaInput').value = '';
+
+    const quotedText = document.getElementById('qaQuoteRef').dataset.fullText || '';
+    let finalQuestion = question;
+    let displayLabel = question;
+    if (quotedText) {
+      finalQuestion = `다음 부분에 대한 질문입니다: "${quotedText}"\n\n질문: ${question}`;
+      displayLabel = `"${quotedText}" 관련 질문: ${question}`;
+    }
+
+    const ok = await askFollowUp(finalQuestion, displayLabel);
+    if (ok) {
+      document.getElementById('qaInput').value = '';
+      clearQaQuote();
+    }
   }
 
   // 답변 텍스트를 받아 Q&A 카드로 추가하는 공통 로직 (직접 질문 / 텍스트 선택 설명 요청 공용)
@@ -1081,7 +1102,7 @@
     el.type = 'button';
     el.id = 'selectionExplainPopup';
     el.className = 'selection-explain-popup';
-    el.textContent = '🤔 이 부분 더 쉽게 설명해주세요';
+    el.textContent = '🤔 이 부분에 대해 질문하기';
     // mousedown에서 preventDefault로 브라우저의 기본 선택 해제 동작을 막는다 (클릭 전에 선택이 풀리는 것 방지)
     el.addEventListener('mousedown', (e) => e.preventDefault());
     el.addEventListener('click', onSelectionPopupClick);
@@ -1154,18 +1175,32 @@
   window.addEventListener('scroll', hideSelectionPopup, true);
   window.addEventListener('resize', hideSelectionPopup);
 
-  async function onSelectionPopupClick() {
+  function onSelectionPopupClick() {
     const text = selectedExplainText;
     if (!text) return;
-    const popup = ensureSelectionPopup();
-    popup.disabled = true;
     window.getSelection()?.removeAllRanges();
     hideSelectionPopup();
+    showQaQuote(text);
 
-    const question = `다음 부분을 더 쉽게 설명해주세요: "${text}"`;
-    const displayLabel = `🤔 이 부분 더 쉽게 설명해주세요: "${text}"`;
-    await askFollowUp(question, displayLabel);
-    popup.disabled = false;
+    const qaInput = document.getElementById('qaInput');
+    qaInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    qaInput.focus();
+  }
+
+  // ── 선택 텍스트 인용 참조 (자유 질문 입력창) ──
+  function showQaQuote(text) {
+    const quoteEl = document.getElementById('qaQuoteRef');
+    const textEl = document.getElementById('qaQuoteText');
+    const truncated = text.length > 120 ? text.slice(0, 120) + '…' : text;
+    textEl.textContent = truncated;
+    quoteEl.dataset.fullText = text;
+    quoteEl.style.display = 'flex';
+  }
+
+  function clearQaQuote() {
+    const quoteEl = document.getElementById('qaQuoteRef');
+    quoteEl.style.display = 'none';
+    quoteEl.dataset.fullText = '';
   }
 
   // ── 🧪 베타: 그래프 시각화 ──
