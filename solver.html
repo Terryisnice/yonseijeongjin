@@ -206,11 +206,12 @@
     .graph-beta-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--gold); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; }
     .graph-info { font-size: 14px; color: var(--gray-900); background: var(--gray-50); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.6; }
     .graph-plot-wrap { width: 100%; aspect-ratio: 16 / 9; margin-bottom: 12px; }
-    .graph-cases { display: flex; flex-direction: column; gap: 16px; }
-    .graph-case { flex: 1; min-width: 0; }
-    .graph-case-label { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
-    .graph-verify-warn { display: inline-flex; align-items: center; gap: 3px; background: #FEF2F2; color: #991B1B; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
-    @media (min-width: 601px) { .graph-cases { flex-direction: row; } }
+    .graph-slider-row { margin-bottom: 10px; }
+    .graph-slider-row label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; font-family: var(--mono); }
+    .graph-slider { width: 100%; accent-color: var(--accent); cursor: pointer; }
+    .graph-status { font-size: 13px; font-weight: 600; color: var(--gray-600); background: var(--gray-50); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; text-align: center; transition: background .15s, color .15s; }
+    .graph-status-yes { color: #1E40AF; background: var(--accent-lt); }
+    .graph-status-no { color: var(--gray-600); background: var(--gray-50); }
     .graph-loading { font-size: 13px; color: var(--gray-400); padding: 20px; text-align: center; }
     .graph-error { font-size: 13px; color: #991B1B; padding: 10px 12px; background: #FEF2F2; border-radius: 8px; margin-bottom: 12px; }
     .btn-graph-redo { padding: 8px 16px; background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--gray-100); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -1092,11 +1093,16 @@ ${solutionText}
 주의사항:
 - 먼저 함수식에 x 이외의 미지수(파라미터, 예: a, k, m)가 포함되어 있는지 판단해 has_parameter에 표시하세요.
 - 미지수가 없으면 has_parameter를 false로 하고, function_label/function_expr/domain_min/domain_max/domain_label 필드를 채우세요.
-- 미지수가 있으면 has_parameter를 true로 하세요. 이때 임의로 값을 하나만 대입해 단일 그래프로 그리지 마세요. 대신 문제의 조건(예: 극값을 갖는/갖지 않는 경계값)을 기준으로 대표적인 두 가지 케이스(조건을 만족하는 경우 / 만족하지 않는 경우)를 골라 cases 배열에 정확히 2개를 채우세요. 각 case_label에는 어떤 값을 대입했는지와 그 결과를 반드시 명시하세요 (예: "a = 1인 경우 (극값 있음)", "a = -1인 경우 (극값 없음)"). 값을 고를 때는 단순히 조건을 만족하는 아무 값이 아니라, 경계값에서 충분히 떨어진 값을 선택해서 두 케이스의 그래프 모양 차이가 한눈에 뚜렷하게 보이도록 하세요. 필요하다면 두 케이스의 domain_min/domain_max도 각 케이스의 특징(극값 위치, 근 등)이 잘 드러나도록 서로 다르게 조정하세요.
-- 경계값(케이스를 가르는 기준)을 정할 때, [풀이 방향 안내]에 이미 도출되었거나 언급된 조건식(예: 판별식 부등식, 도함수 부호 조건 등)이 있다면 그 조건을 그대로 사용하세요. 스스로 처음부터 다시 유도하지 말고, 안내문에 나온 조건식의 경계값을 그대로 재사용해서 케이스 값을 고르세요. 안내문에 조건이 명시되어 있지 않을 때만 직접 계산해서 도출하세요.
-- case_label에 "있음"/"없음" 등으로 결과를 단정하기 전에, 대입한 값으로 실제 도함수의 부호가 구간 내에서 바뀌는지 등을 직접 계산으로 재확인한 뒤 라벨을 작성하세요. 계산 없이 추측으로 라벨을 붙이지 마세요.
-- function_expr는 변수 x에 대한 수식만 사용하세요(미지수는 값을 대입해 남기지 마세요). 사칙연산(+ - * /), 거듭제곱(^ 또는 **), sin, cos, tan, sqrt, log, abs, exp 함수만 허용됩니다. Math. 같은 접두사는 쓰지 마세요. 예: "x^2 - 4*x + 3", "sin(x)"
-- function_label은 KaTeX(LaTeX) 문법으로 작성하세요. 지수는 ^{...}, 분수는 \\frac{분자}{분모} 형태를 사용하세요. 예: "f(x) = \\frac{x^2 - x + 1}{e^x}"
+- 미지수가 있으면 has_parameter를 true로 하세요. 이 경우 특정 값을 대입하거나 "극값이 있는지/없는지" 같은 판단을 당신이 직접 내리지 마세요. 그 판단은 학생이 슬라이더로 직접 값을 바꿔가며 화면에서 계산된 결과로 확인합니다. 대신 아래 필드만 채우세요:
+  - param_name: 파라미터 변수명 한 글자 (예: "a")
+  - function_label_template: 파라미터를 값으로 바꾸지 않고 문자 그대로 남긴 KaTeX 함수식 (예: "f(x) = \\\\frac{x^2 - x + a}{e^x}")
+  - function_expr_template: 파라미터를 문자 그대로 남긴 JS 수식 (x와 파라미터 문자만 변수로 사용, 예: "(x^2 - x + a)/exp(x)")
+  - param_min, param_max: 슬라이더로 움직일 파라미터의 적당한 범위 (문제의 맥락에서 의미 있는 값들이 그 안에 충분히 포함되도록)
+  - param_default: 슬라이더의 초기값 (문제에서 다루는 대표적인 값이나 범위의 중간값)
+  - param_step: 슬라이더 이동 간격 (예: 0.1)
+  - domain_min, domain_max, domain_label: x축 표시 범위 (param_default 값을 기준으로 그래프 특징이 잘 보이는 범위)
+- function_expr / function_expr_template는 사칙연산(+ - * /), 거듭제곱(^ 또는 **), sin, cos, tan, sqrt, log, abs, exp 함수만 허용됩니다. Math. 같은 접두사는 쓰지 마세요. 예: "x^2 - 4*x + 3", "sin(x)"
+- function_label / function_label_template은 KaTeX(LaTeX) 문법으로 작성하세요. 지수는 ^{...}, 분수는 \\frac{분자}{분모} 형태를 사용하세요. 예: "f(x) = \\frac{x^2 - x + 1}{e^x}"
 - domain_min, domain_max는 그래프를 그릴 x의 범위를 숫자로 지정하세요. 문제에 정의역이 명시되지 않았다면 그래프의 특징(꼭짓점, 근 등)이 잘 보이는 적절한 범위를 스스로 정하세요.`;
 
     const parts = [];
@@ -1109,25 +1115,16 @@ ${solutionText}
         has_parameter: { type: 'BOOLEAN', description: '함수식에 x 이외의 미지수(파라미터, 예: a, k)가 포함되어 있으면 true' },
         function_label: { type: 'STRING', description: 'has_parameter가 false일 때 사용. KaTeX(LaTeX) 문법의 함수식 표기, 예: f(x) = \\frac{x^2 - x + 1}{e^x}' },
         function_expr: { type: 'STRING', description: 'has_parameter가 false일 때 사용. x에 대한 JS 수식, 예: x**2 - 4*x + 3' },
-        domain_min: { type: 'NUMBER', description: 'has_parameter가 false일 때 사용' },
-        domain_max: { type: 'NUMBER', description: 'has_parameter가 false일 때 사용' },
-        domain_label: { type: 'STRING', description: 'has_parameter가 false일 때 사용. 사람이 읽기 좋은 정의역 표기, 예: -1 ≤ x ≤ 5' },
-        cases: {
-          type: 'ARRAY',
-          description: 'has_parameter가 true일 때 사용. 미지수에 값을 대입한 대표적인 두 가지 케이스(조건을 만족하는 경우 / 만족하지 않는 경우)',
-          items: {
-            type: 'OBJECT',
-            properties: {
-              case_label: { type: 'STRING', description: '어떤 값을 대입했는지와 그 결과를 설명하는 라벨, 예: a = 1인 경우 (극값 있음)' },
-              function_label: { type: 'STRING', description: '값이 대입된 KaTeX(LaTeX) 함수식 표기' },
-              function_expr: { type: 'STRING', description: '값이 대입되어 x만 남은 JS 수식' },
-              domain_min: { type: 'NUMBER' },
-              domain_max: { type: 'NUMBER' },
-              domain_label: { type: 'STRING' }
-            },
-            required: ['case_label', 'function_label', 'function_expr', 'domain_min', 'domain_max', 'domain_label']
-          }
-        }
+        domain_min: { type: 'NUMBER', description: '그래프를 그릴 x의 범위(최소값). has_parameter가 true일 때는 param_default 기준으로 특징이 잘 보이는 범위' },
+        domain_max: { type: 'NUMBER', description: '그래프를 그릴 x의 범위(최대값). has_parameter가 true일 때는 param_default 기준으로 특징이 잘 보이는 범위' },
+        domain_label: { type: 'STRING', description: '사람이 읽기 좋은 정의역 표기, 예: -1 ≤ x ≤ 5' },
+        param_name: { type: 'STRING', description: 'has_parameter가 true일 때 사용. 파라미터 변수명 한 글자, 예: a' },
+        function_label_template: { type: 'STRING', description: 'has_parameter가 true일 때 사용. 파라미터를 문자 그대로 남긴 KaTeX(LaTeX) 함수식, 예: f(x) = \\frac{x^2 - x + a}{e^x}' },
+        function_expr_template: { type: 'STRING', description: 'has_parameter가 true일 때 사용. 파라미터를 문자 그대로 남긴 x에 대한 JS 수식, 예: (x^2 - x + a)/exp(x)' },
+        param_min: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 최소값' },
+        param_max: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 최대값' },
+        param_default: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 초기값(문제에서 다루는 대표적인 값)' },
+        param_step: { type: 'NUMBER', description: 'has_parameter가 true일 때 사용. 슬라이더 이동 간격, 예: 0.1' }
       },
       required: ['has_parameter']
     };
@@ -1188,8 +1185,8 @@ ${solutionText}
   }
 
   function renderGraphResult(info) {
-    if (info && info.has_parameter && Array.isArray(info.cases) && info.cases.length) {
-      renderGraphCases(info.cases);
+    if (info && info.has_parameter) {
+      renderGraphParamSlider(info);
       return;
     }
 
@@ -1215,42 +1212,120 @@ ${solutionText}
     renderGraphKatex();
   }
 
-  // 🧪 베타: 미지수(파라미터)가 있는 함수 — 대표 두 케이스를 나란히/순서대로 표시
-  function renderGraphCases(cases) {
-    const items = cases.slice(0, 2);
-    const blocks = items.map((c) => {
-      graphPlotCounter++;
-      const mismatch = checkExtremumLabelMismatch(c);
-      return { plotId: `graphPlot_${graphPlotCounter}`, caseData: c, mismatch };
-    });
+  // 🧪 베타: 미지수(파라미터)가 있는 함수 — 슬라이더로 값을 바꿔가며 즉시 그래프/극값 판정을 갱신
+  function renderGraphParamSlider(info) {
+    const paramName = String(info.param_name || '').trim();
+    const min = Number(info.domain_min);
+    const max = Number(info.domain_max);
 
-    const casesHtml = blocks.map(b => `
-      <div class="graph-case">
-        <div class="graph-case-label">${escapeHtml(b.caseData.case_label || '')}${b.mismatch ? '<span class="graph-verify-warn">⚠️ 검증 필요</span>' : ''}</div>
-        <div class="graph-info">함수: $${escapeHtml(b.caseData.function_label || '')}$<br>정의역: ${escapeHtml(b.caseData.domain_label || '')}</div>
-        <div class="graph-plot-wrap" id="${b.plotId}"></div>
-      </div>
-    `).join('');
+    if (!/^[a-zA-Z]$/.test(paramName) || MATH_EXPR_ALLOWED_WORDS.has(paramName)) {
+      renderGraphError('파라미터 변수명을 인식할 수 없습니다.');
+      return;
+    }
+    if (!isFinite(min) || !isFinite(max) || min >= max) {
+      renderGraphError('정의역 정보가 올바르지 않습니다.');
+      return;
+    }
+
+    let pMin = Number(info.param_min);
+    let pMax = Number(info.param_max);
+    if (!isFinite(pMin) || !isFinite(pMax) || pMin >= pMax) { pMin = -5; pMax = 5; }
+    let pDefault = Number(info.param_default);
+    if (!isFinite(pDefault) || pDefault < pMin || pDefault > pMax) pDefault = (pMin + pMax) / 2;
+    let pStep = Number(info.param_step);
+    if (!isFinite(pStep) || pStep <= 0) pStep = (pMax - pMin) / 100 || 0.1;
+
+    graphPlotCounter++;
+    const plotId = `graphPlot_${graphPlotCounter}`;
+    const sliderId = `graphSlider_${graphPlotCounter}`;
+    const valueId = `graphSliderVal_${graphPlotCounter}`;
+    const statusId = `graphStatus_${graphPlotCounter}`;
 
     graphCardEl.innerHTML = `
       <div class="graph-beta-badge">🧪 베타 · 그래프</div>
-      <div class="graph-cases">${casesHtml}</div>
+      <div class="graph-info">함수: $${escapeHtml(info.function_label_template || '')}$<br>정의역: ${escapeHtml(info.domain_label || '')}</div>
+      <div class="graph-plot-wrap" id="${plotId}"></div>
+      <div class="graph-slider-row">
+        <label for="${sliderId}">${escapeHtml(paramName)} = <span id="${valueId}"></span></label>
+        <input type="range" id="${sliderId}" class="graph-slider" min="${pMin}" max="${pMax}" step="${pStep}" value="${pDefault}">
+      </div>
+      <div class="graph-status" id="${statusId}"></div>
       <button type="button" class="btn-graph-redo" onclick="requestGraphExplanation()">🔄 오류 시 다시 그리기</button>
     `;
 
-    blocks.forEach(b => {
-      try {
-        const min = Number(b.caseData.domain_min);
-        const max = Number(b.caseData.domain_max);
-        if (!isFinite(min) || !isFinite(max) || min >= max) throw new Error('정의역 정보가 올바르지 않습니다.');
-        drawGraphPlot(b.plotId, b.caseData.function_expr, min, max);
-      } catch (e) {
-        const plotWrap = document.getElementById(b.plotId);
-        if (plotWrap) plotWrap.innerHTML = `<div class="graph-error">⚠️ 그래프를 그릴 수 없습니다: ${escapeHtml(e.message)}</div>`;
-      }
+    const state = { expr: info.function_expr_template, paramName, min, max, plotId, statusId, valueId };
+
+    try {
+      updateGraphParamPlot(state, pDefault, true);
+    } catch (e) {
+      const plotWrap = document.getElementById(plotId);
+      if (plotWrap) plotWrap.innerHTML = `<div class="graph-error">⚠️ 그래프를 그릴 수 없습니다: ${escapeHtml(e.message)}</div>`;
+    }
+
+    document.getElementById(sliderId).addEventListener('input', (e) => {
+      updateGraphParamPlot(state, Number(e.target.value), false);
     });
 
     renderGraphKatex();
+  }
+
+  // 슬라이더 값이 바뀔 때마다: API 재호출 없이 클라이언트에서 즉시 재계산 → Plotly 갱신
+  function updateGraphParamPlot(state, paramVal, isFirst) {
+    const extraVars = { [state.paramName]: paramVal };
+    const steps = 200;
+    const xs = [];
+    const ys = [];
+    for (let i = 0; i <= steps; i++) {
+      const x = state.min + (state.max - state.min) * (i / steps);
+      let y;
+      try { y = evalMathExpr(state.expr, x, extraVars); } catch (e) { y = null; }
+      xs.push(x);
+      ys.push(typeof y === 'number' && isFinite(y) ? y : null);
+    }
+
+    if (!window.Plotly) throw new Error('그래프 라이브러리를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+
+    const trace = [{ x: xs, y: ys, mode: 'lines', type: 'scatter', line: { color: '#2563EB', width: 2.5 } }];
+    const layout = {
+      margin: { l: 40, r: 20, t: 16, b: 32 },
+      xaxis: { gridcolor: '#EFF1F5', zerolinecolor: '#9AA3B2' },
+      yaxis: { gridcolor: '#EFF1F5', zerolinecolor: '#9AA3B2' },
+      font: { family: 'DM Mono, monospace', size: 11, color: '#4B5563' },
+      paper_bgcolor: 'transparent',
+      plot_bgcolor: 'transparent',
+      autosize: true
+    };
+    if (isFirst) {
+      Plotly.newPlot(state.plotId, trace, layout, { responsive: true, displayModeBar: false });
+    } else {
+      Plotly.react(state.plotId, trace, layout, { responsive: true, displayModeBar: false });
+    }
+
+    const valueEl = document.getElementById(state.valueId);
+    if (valueEl) valueEl.textContent = formatParamValue(paramVal);
+
+    const statusEl = document.getElementById(state.statusId);
+    if (statusEl) {
+      let hasExtremum;
+      try {
+        hasExtremum = detectExtremumNumeric(state.expr, state.min, state.max, extraVars);
+      } catch (e) {
+        hasExtremum = null;
+      }
+      if (hasExtremum === null) {
+        statusEl.textContent = `${state.paramName} = ${formatParamValue(paramVal)} → 극값 판정 불가 (정의역을 확인해주세요)`;
+        statusEl.className = 'graph-status';
+      } else {
+        statusEl.textContent = `${state.paramName} = ${formatParamValue(paramVal)} → 극값 ${hasExtremum ? '있음' : '없음'}`;
+        statusEl.className = `graph-status ${hasExtremum ? 'graph-status-yes' : 'graph-status-no'}`;
+      }
+    }
+  }
+
+  function formatParamValue(v) {
+    const n = Number(v);
+    if (!isFinite(n)) return String(v);
+    return (Math.round(n * 1000) / 1000).toString();
   }
 
   function drawGraphPlot(plotId, expr, min, max) {
@@ -1292,47 +1367,27 @@ ${solutionText}
   }
 
   // 그래프용 안전한 수식 평가 (x, 사칙연산, 거듭제곱, 기본 함수만 허용)
+  // extraVars: 슬라이더 파라미터 등 x 외의 추가 변수를 넘길 때 사용, 예: { a: 1.5 }
   const MATH_EXPR_ALLOWED_WORDS = new Set(['x','sin','cos','tan','asin','acos','atan','sqrt','log','log10','abs','exp','pow','floor','ceil','round','min','max','PI','E']);
-  function evalMathExpr(expr, xVal) {
+  function evalMathExpr(expr, xVal, extraVars) {
     if (typeof expr !== 'string' || !expr.trim()) throw new Error('수식이 없습니다.');
     const cleaned = expr.replace(/\s+/g, '');
     if (!/^[0-9x.+\-*/^(),a-zA-Z]+$/.test(cleaned)) throw new Error('허용되지 않는 문자가 포함된 수식입니다.');
+    const extraNames = extraVars ? Object.keys(extraVars) : [];
     const words = cleaned.match(/[a-zA-Z]+/g) || [];
-    if (!words.every(w => MATH_EXPR_ALLOWED_WORDS.has(w))) throw new Error('지원하지 않는 함수가 포함된 수식입니다.');
+    if (!words.every(w => MATH_EXPR_ALLOWED_WORDS.has(w) || extraNames.includes(w))) throw new Error('지원하지 않는 함수 또는 변수가 포함된 수식입니다.');
     const jsExpr = cleaned
       .replace(/\^/g, '**')
       .replace(/\b(sin|cos|tan|asin|acos|atan|sqrt|log10|log|abs|exp|pow|floor|ceil|round|min|max)\b(?=\()/g, 'Math.$1')
       .replace(/\bPI\b/g, 'Math.PI')
       .replace(/\bE\b/g, 'Math.E');
-    const fn = new Function('x', `"use strict"; return (${jsExpr});`);
-    return fn(xVal);
-  }
-
-  // 🧪 베타: 그래프 케이스 라벨("극값 있음/없음")과 실제 함수 개형이 일치하는지 안전장치로 재검증
-  // AI가 만든 라벨을 신뢰하지 않고, 도함수(수치미분)의 부호가 구간 내에서 바뀌는지 직접 계산해서 비교한다.
-  function checkExtremumLabelMismatch(caseData) {
-    const label = caseData?.case_label || '';
-    const match = label.match(/극값\s*(있|없)/);
-    if (!match) return false; // 라벨이 극값을 언급하지 않으면 검증 대상 아님
-    const claimedHasExtremum = match[1] === '있';
-
-    const min = Number(caseData.domain_min);
-    const max = Number(caseData.domain_max);
-    if (!isFinite(min) || !isFinite(max) || min >= max) return false;
-
-    let actualHasExtremum;
-    try {
-      actualHasExtremum = detectExtremumNumeric(caseData.function_expr, min, max);
-    } catch (e) {
-      return false; // 수식 평가 자체가 안되면 그래프 렌더링 단계에서 별도로 에러 표시됨
-    }
-    if (actualHasExtremum === null) return false; // 판단 불가(전 구간 미정의 등) → 경고 생략
-
-    return actualHasExtremum !== claimedHasExtremum;
+    const fn = new Function('x', ...extraNames, `"use strict"; return (${jsExpr});`);
+    return fn(xVal, ...extraNames.map(n => extraVars[n]));
   }
 
   // 구간 내 도함수(중앙차분) 부호가 바뀌는 지점이 있으면 극값이 존재하는 것으로 판단
-  function detectExtremumNumeric(expr, min, max) {
+  // extraVars: 슬라이더 파라미터 등 x 외의 추가 변수를 넘길 때 사용, 예: { a: 1.5 }
+  function detectExtremumNumeric(expr, min, max, extraVars) {
     const steps = 400;
     const range = max - min;
     const h = range / steps / 10;
@@ -1343,8 +1398,8 @@ ${solutionText}
       const x = min + range * (i / steps);
       let d;
       try {
-        const y1 = evalMathExpr(expr, x - h);
-        const y2 = evalMathExpr(expr, x + h);
+        const y1 = evalMathExpr(expr, x - h, extraVars);
+        const y2 = evalMathExpr(expr, x + h, extraVars);
         if (!isFinite(y1) || !isFinite(y2)) { prevSign = null; continue; }
         d = (y2 - y1) / (2 * h);
       } catch (e) { prevSign = null; continue; }
