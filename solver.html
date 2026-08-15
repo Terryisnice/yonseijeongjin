@@ -201,6 +201,12 @@
     .qa-chip:hover:not(:disabled) { background: #dbeafe; }
     .qa-chip:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* 텍스트 선택 → 더 쉽게 설명해주세요 팝업 */
+    .selection-explain-popup { display: none; position: fixed; z-index: 400; padding: 9px 16px; background: var(--navy); color: var(--white); border: none; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(15,32,68,.3); white-space: nowrap; }
+    .selection-explain-popup.visible { display: block; }
+    .selection-explain-popup:hover { background: var(--navy-mid); }
+    .selection-explain-popup:disabled { opacity: .6; cursor: not-allowed; }
+
     /* 그래프 카드 (🧪 베타) */
     .graph-card { background: var(--white); border: 1.5px dashed var(--gold); border-radius: 10px; padding: 16px 18px; margin-top: 16px; }
     .graph-beta-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--gold); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; }
@@ -260,7 +266,7 @@
     .history-date { font-size: 11px; color: var(--gray-400); font-family: var(--mono); margin-bottom: 4px; }
     .history-preview { font-size: 13px; color: var(--gray-600); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     @media print {
-      nav, .api-card, .input-card, .btn-reset, .btn-pdf, .loading, .sticky-problem, .qa-input-row, .qa-chips, .btn-graph-redo { display: none !important; }
+      nav, .api-card, .input-card, .btn-reset, .btn-pdf, .loading, .sticky-problem, .qa-input-row, .qa-chips, .btn-graph-redo, .selection-explain-popup { display: none !important; }
       .print-problem { display: block !important; margin-bottom: 24px; page-break-inside: avoid; }
       .print-problem img { width: 100%; max-width: 100%; height: auto; border-radius: 8px; display: block; }
       .result-card { box-shadow: none; border: none; padding: 0; }
@@ -465,8 +471,6 @@
     <div class="qa-section" id="qaSection">
       <div class="qa-list" id="qaList"></div>
       <div class="qa-chips" id="qaChips">
-        <button type="button" class="qa-chip" onclick="fillQuestion('이 부분이 왜 이렇게 되는지 더 쉽게 설명해주세요.')">🤔 더 쉽게 설명해주세요</button>
-        <button type="button" class="qa-chip" onclick="fillQuestion('비슷한 유형의 예시를 하나 더 보여주세요.')">🔁 비슷한 예시 더 보기</button>
         <button type="button" class="qa-chip" id="graphChipBtn" onclick="requestGraphExplanation()">📊 이 문제를 그래프로 설명해주세요</button>
       </div>
       <div class="qa-input-row">
@@ -992,7 +996,15 @@
     if (!qaContext) { showError('먼저 문제를 풀이해주세요.'); return; }
     const question = document.getElementById('qaInput').value.trim();
     if (!question) { showError('질문을 입력해주세요.'); return; }
-    if (!apiKey) { showError('Gemini API 키를 먼저 저장해주세요.'); return; }
+    const ok = await askFollowUp(question);
+    if (ok) document.getElementById('qaInput').value = '';
+  }
+
+  // 답변 텍스트를 받아 Q&A 카드로 추가하는 공통 로직 (직접 질문 / 텍스트 선택 설명 요청 공용)
+  async function askFollowUp(question, displayLabel) {
+    hideError();
+    if (!qaContext) { showError('먼저 문제를 풀이해주세요.'); return false; }
+    if (!apiKey) { showError('Gemini API 키를 먼저 저장해주세요.'); return false; }
 
     const model = document.getElementById('modelSelect').value;
     const requestContents = [...qaContext.contents, { role: 'user', parts: [{ text: question }] }];
@@ -1031,7 +1043,7 @@
       const card = document.createElement('div');
       card.className = 'qa-card';
       const answerHtml = window.marked ? marked.parse(answerText) : markdownToHtml(answerText);
-      card.innerHTML = `<div class="qa-question">💬 ${escapeHtml(question)}</div><div class="result-body">${answerHtml}</div>`;
+      card.innerHTML = `<div class="qa-question">💬 ${escapeHtml(displayLabel || question)}</div><div class="result-body">${answerHtml}</div>`;
       document.getElementById('qaList').appendChild(card);
 
       if (window.renderMathInElement) {
@@ -1041,8 +1053,8 @@
         });
       }
 
-      document.getElementById('qaInput').value = '';
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return true;
 
     } catch (err) {
       let msg = err.message;
@@ -1052,16 +1064,108 @@
         msg = '일일 사용량 한도에 도달했습니다. 내일 다시 시도하거나 API 키를 확인해주세요.';
       }
       showError(msg);
+      return false;
     } finally {
       document.getElementById('qaLoading').classList.remove('visible');
       btn.disabled = false;
     }
   }
 
-  // ── 추천 질문 칩 ──
-  function fillQuestion(text) {
-    document.getElementById('qaInput').value = text;
-    document.getElementById('qaInput').focus();
+  // ── 텍스트 선택 → "이 부분 더 쉽게 설명해주세요" 팝업 ──
+  let selectionPopupEl = null;
+  let selectedExplainText = '';
+
+  function ensureSelectionPopup() {
+    if (selectionPopupEl) return selectionPopupEl;
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.id = 'selectionExplainPopup';
+    el.className = 'selection-explain-popup';
+    el.textContent = '🤔 이 부분 더 쉽게 설명해주세요';
+    // mousedown에서 preventDefault로 브라우저의 기본 선택 해제 동작을 막는다 (클릭 전에 선택이 풀리는 것 방지)
+    el.addEventListener('mousedown', (e) => e.preventDefault());
+    el.addEventListener('click', onSelectionPopupClick);
+    document.body.appendChild(el);
+    selectionPopupEl = el;
+    return el;
+  }
+
+  function hideSelectionPopup() {
+    if (selectionPopupEl) selectionPopupEl.classList.remove('visible');
+  }
+
+  function showSelectionPopupForSelection(sel) {
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (!rect || (rect.width === 0 && rect.height === 0)) { hideSelectionPopup(); return; }
+
+    selectedExplainText = sel.toString().trim();
+    if (!selectedExplainText) { hideSelectionPopup(); return; }
+
+    const popup = ensureSelectionPopup();
+    popup.disabled = false;
+    popup.classList.add('visible');
+
+    const popupRect = popup.getBoundingClientRect();
+    let top = rect.top - popupRect.height - 8;
+    if (top < 8) top = rect.bottom + 8;
+    let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+    left = Math.max(8, Math.min(left, window.innerWidth - popupRect.width - 8));
+    popup.style.top = `${top}px`;
+    popup.style.left = `${left}px`;
+  }
+
+  function handleSelectionChange() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) { hideSelectionPopup(); return; }
+
+    const text = sel.toString().trim();
+    if (!text) { hideSelectionPopup(); return; }
+
+    const anchorNode = sel.anchorNode;
+    const anchorEl = anchorNode && (anchorNode.nodeType === 1 ? anchorNode : anchorNode.parentElement);
+    if (!anchorEl) { hideSelectionPopup(); return; }
+
+    // 팝업 버튼 자체를 선택한 경우는 무시
+    if (selectionPopupEl && selectionPopupEl.contains(anchorEl)) return;
+
+    // 풀이 본문(resultBody)과 추가 질문 답변(qaList) 영역에서만 동작
+    const resultBodyEl = document.getElementById('resultBody');
+    const qaListEl = document.getElementById('qaList');
+    const inScope = (resultBodyEl && resultBodyEl.contains(anchorEl)) || (qaListEl && qaListEl.contains(anchorEl));
+    if (!inScope) { hideSelectionPopup(); return; }
+
+    showSelectionPopupForSelection(sel);
+  }
+
+  document.addEventListener('mouseup', (e) => {
+    if (selectionPopupEl && selectionPopupEl.contains(e.target)) return;
+    setTimeout(handleSelectionChange, 0);
+  });
+  // 모바일 터치 선택은 selection 확정 시점이 mouseup과 달라 약간의 지연을 두고 확인한다
+  document.addEventListener('touchend', (e) => {
+    if (selectionPopupEl && selectionPopupEl.contains(e.target)) return;
+    setTimeout(handleSelectionChange, 150);
+  });
+  document.addEventListener('selectionchange', () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) hideSelectionPopup();
+  });
+  window.addEventListener('scroll', hideSelectionPopup, true);
+  window.addEventListener('resize', hideSelectionPopup);
+
+  async function onSelectionPopupClick() {
+    const text = selectedExplainText;
+    if (!text) return;
+    const popup = ensureSelectionPopup();
+    popup.disabled = true;
+    window.getSelection()?.removeAllRanges();
+    hideSelectionPopup();
+
+    const question = `다음 부분을 더 쉽게 설명해주세요: "${text}"`;
+    const displayLabel = `🤔 이 부분 더 쉽게 설명해주세요: "${text}"`;
+    await askFollowUp(question, displayLabel);
+    popup.disabled = false;
   }
 
   // ── 🧪 베타: 그래프 시각화 ──
