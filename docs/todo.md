@@ -43,6 +43,11 @@
 - [x] 문제 사진 sticky 고정
 - [x] PDF 저장
 
+### API 키 관리
+- [x] API 키 다중 등록 + 할당량 초과 자동 전환 (main)
+- [x] API 키 중복 입력 경고 + 보기/숨기기 토글 (main)
+- [x] AI 모델 목록에 Gemini 3.7 Flash 추가 (main)
+
 ### UI/UX 개선
 - [x] index.html 모바일에서 선생님 사진 카드 노출
 - [x] index.html 모바일 AI 도구 바로가기 플로팅 버튼 추가

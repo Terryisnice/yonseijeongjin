@@ -129,6 +129,9 @@
     .api-key-index { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; background: var(--gray-100); color: var(--gray-600); font-size: 11px; font-weight: 700; font-family: var(--mono); border-radius: 50%; }
     .btn-remove-key { flex-shrink: 0; width: 34px; height: 34px; background: var(--gray-50); border: 1.5px solid var(--gray-100); border-radius: 8px; color: var(--gray-400); font-size: 14px; cursor: pointer; transition: color .2s, border-color .2s; }
     .btn-remove-key:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-toggle-key { flex-shrink: 0; width: 34px; height: 34px; background: var(--gray-50); border: 1.5px solid var(--gray-100); border-radius: 8px; color: var(--gray-400); font-size: 14px; cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+    .btn-toggle-key:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-toggle-key.active { color: var(--accent); border-color: var(--accent); background: var(--accent-lt); }
     .api-key-toolbar { display: flex; gap: 10px; margin-top: 10px; }
     .btn-add-key { padding: 10px 16px; background: var(--white); color: var(--accent); border: 1.5px dashed var(--accent); border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s; }
     .btn-add-key:hover { background: var(--accent-lt); }
@@ -312,6 +315,7 @@
       <button class="btn-save" onclick="saveApiKeys()">저장</button>
     </div>
     <p class="api-key-switch-notice" id="apiKeySwitchNotice" style="display:none;"></p>
+    <p class="api-key-switch-notice" id="apiKeyDuplicateNotice" style="display:none;"></p>
     <p class="api-hint">
       API 키는 브라우저에만 저장되며 외부로 전송되지 않습니다. 여러 개 등록하면 할당량 초과 시 자동으로 다음 키로 전환됩니다.<br>
       키가 없으면 <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>에서 무료로 발급받으세요.
@@ -605,9 +609,41 @@
       <div class="api-input-row api-key-row">
         <span class="api-key-index">${i + 1}</span>
         <input type="password" class="api-input" placeholder="Gemini API 키 ${i + 1} (AIza... 또는 AQ...)" autocomplete="off" value="${escapeHtml(k || '')}">
+        <button type="button" class="btn-toggle-key" title="키 보기/숨기기" onclick="toggleKeyVisibility(this)">👁</button>
         ${rows.length > 1 ? `<button type="button" class="btn-remove-key" title="키 삭제" onclick="removeApiKeyRow(${i})">✕</button>` : ''}
       </div>
     `).join('');
+  }
+
+  function toggleKeyVisibility(btn) {
+    const input = btn.closest('.api-key-row').querySelector('.api-input');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.classList.toggle('active', show);
+  }
+
+  function findDuplicateKeyMessages(rawValues) {
+    const messages = [];
+    for (let i = 0; i < rawValues.length; i++) {
+      if (!rawValues[i]) continue;
+      for (let j = 0; j < i; j++) {
+        if (rawValues[j] && rawValues[i] === rawValues[j]) {
+          messages.push(`${i + 1}번째 키가 ${j + 1}번째 키와 동일합니다.`);
+          break;
+        }
+      }
+    }
+    return messages;
+  }
+
+  function showKeyDuplicateNotice(messages) {
+    const el = document.getElementById('apiKeyDuplicateNotice');
+    el.innerHTML = '⚠️ ' + messages.join('<br>⚠️ ');
+    el.style.display = 'block';
+  }
+
+  function hideKeyDuplicateNotice() {
+    document.getElementById('apiKeyDuplicateNotice').style.display = 'none';
   }
 
   function getApiKeyRowValues() {
@@ -618,25 +654,30 @@
     const values = getApiKeyRowValues();
     values.push('');
     renderApiKeyRows(values);
+    hideKeyDuplicateNotice();
   }
 
   function removeApiKeyRow(index) {
     const values = getApiKeyRowValues();
     values.splice(index, 1);
     renderApiKeyRows(values.length ? values : ['']);
+    hideKeyDuplicateNotice();
   }
 
   function saveApiKeys() {
-    const values = getApiKeyRowValues().map(v => v.trim()).filter(Boolean);
+    const rawValues = getApiKeyRowValues().map(v => v.trim());
+    const values = rawValues.filter(Boolean);
     if (!values.length) { showError('API 키를 최소 1개 입력해주세요.'); return; }
     const invalid = values.find(v => !v.startsWith('AIza') && !v.startsWith('AQ.'));
     if (invalid) { showError('유효한 Gemini API 키가 아닙니다. AIza 또는 AQ.로 시작해야 합니다.'); return; }
+    const dupMessages = findDuplicateKeyMessages(rawValues);
     apiKeys = values;
     currentKeyIndex = 0;
     localStorage.setItem('gemini_api_keys', JSON.stringify(apiKeys));
     localStorage.setItem('gemini_api_key', apiKeys[0]);
     renderApiKeyRows(apiKeys);
     hideKeySwitchNotice();
+    if (dupMessages.length) { showKeyDuplicateNotice(dupMessages); } else { hideKeyDuplicateNotice(); }
     updateApiStatus(true);
     hideError();
     updateSubmitBtn();
