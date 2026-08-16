@@ -66,6 +66,8 @@
 - [x] 태블릿 가로모드/큰 사진 시 sticky 사진이 해설 가리는 문제 → max-height 30vh 상한 적용
 - [ ] grader.html 실제 학생 테스트 (손글씨 인식 확인)
 - [x] 히스토리 localStorage 용량 초과 시 에러 처리
+- [x] solver.html CSS lint 경고(line-clamp) 수정
+- [x] 풀이봇 ↔ 채점봇 상호 이동 링크 추가 (nav)
 
 ---
 
