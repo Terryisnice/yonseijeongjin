@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수학 풀이봇 | YK정진수학</title>
+  <meta name="description" content="YK정진수학 수학 풀이봇 - 문제 사진을 올리면 풀이 과정을 단계별로 보여주는 AI 수학 풀이 도구. 답이 아닌 과정을 검토하는 1:1 원격 수학 과외 YK정진수학(구 연세정진수학).">
+  <meta name="keywords" content="YK정진수학, 연세정진수학, 수학풀이, AI수학풀이, 수학풀이봇, 수학문제풀이, 수능수학, 원격수학과외, 김태경">
+
   <!-- KaTeX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -45,6 +48,7 @@
     nav { background: var(--navy); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .nav-logo { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--white); text-decoration: none; display: flex; align-items: center; gap: 8px; }
     .nav-badge { width: 28px; height: 28px; background: var(--gold); border-radius: 6px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--navy); }
+    .nav-logo-alt { font-family: var(--sans); font-size: 11px; font-weight: 400; color: rgba(255,255,255,.5); }
     .nav-back { font-size: 13px; color: rgba(255,255,255,.6); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color .2s; }
     .nav-back:hover { color: var(--white); }
     .nav-links { display: flex; align-items: center; gap: 16px; }
@@ -288,7 +292,7 @@
 <nav>
   <a href="index.html" class="nav-logo">
     <div class="nav-badge">연</div>
-    YK정진수학
+    YK정진수학 <span class="nav-logo-alt">(구 연세정진수학)</span>
   </a>
   <div class="nav-links">
     <a href="grader.html" class="nav-back">채점 AI →</a>
