@@ -93,7 +93,8 @@
     .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .feature-card { background: var(--white); border: 1px solid var(--gray-100); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
     .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .feature-icon { width: 52px; height: 52px; background: var(--accent-lt); border-radius: 14px; display: grid; place-items: center; margin-bottom: 20px; font-size: 24px; }
+    .feature-icon { width: 52px; height: 52px; background: var(--accent-lt); border-radius: 14px; display: grid; place-items: center; margin-bottom: 20px; color: var(--accent); }
+    .feature-icon svg { width: 26px; height: 26px; }
     .feature-card h3 { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 10px; line-height: 1.4; }
     .feature-card p { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
     .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
@@ -124,7 +125,10 @@
     .service-card p { font-size: 14px; line-height: 1.7; }
     .service-card.active p { color: rgba(255,255,255,.7); }
     .service-card.coming p { color: var(--gray-600); }
-    .service-icon { font-size: 32px; margin-bottom: 16px; display: block; }
+    .service-icon { margin-bottom: 16px; display: block; }
+    .service-icon svg { width: 30px; height: 30px; }
+    .service-card.active .service-icon { color: var(--gold); }
+    .service-card.coming .service-icon { color: var(--navy); }
 
     /* 성과 섹션 */
     .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
@@ -294,32 +298,32 @@
       <p class="section-sub">맞은 문제도 틀린 문제도, 모든 풀이를 검토합니다. 답이 아닌 과정을 보는 수업입니다.</p>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">✅</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div>
           <h3>맞은 문제도 풀이를 봅니다</h3>
           <p>찍어서 맞은 건지, 실력으로 맞은 건지 구분합니다. 더 좋은 풀이가 있다면 제안합니다. 사고의 구조를 다듬는 게 진짜 실력입니다.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🔍</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></div>
           <h3>틀린 문제는 단계별 힌트</h3>
           <p>어디서 왜 틀렸는지 단계별로 짚어줍니다. 정답을 주는 게 아니라 스스로 찾도록 유도합니다. 계산 실수인지, 방향이 틀린 건지, 아예 접근을 못 한 건지 구분합니다.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📱</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="17" rx="2"/><line x1="7" y1="18" x2="13" y2="18"/><path d="M15 16l5-5 1 1-5 5-2 .5.5-2z"/></svg></div>
           <h3>실시간 쌍방향 태블릿 수업</h3>
           <p>학생이 태블릿 펜으로 직접 풀고 설명하는 과정을 실시간으로 지켜보며 막히는 구간을 정확히 코칭합니다. 밀착도 100%.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🔁</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3L4 16"/><path d="M4 20v-4h4"/></svg></div>
           <h3>틀린 문제 유사 반복 훈련</h3>
           <p>틀린 문제는 완벽히 알 때까지 넘어가지 않습니다. 유사 문항을 반복 제공해 빈틈없이 학습시킵니다.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📅</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg></div>
           <h3>밀림 방지 스터디 플래너</h3>
           <p>계획이 밀렸을 때 앱이 스스로 목표일을 조정하거나 하루 목표를 재계산합니다. 밀림 방지 전용 시스템.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">💬</div>
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4h-1l-3 3v-3h-1a4 4 0 0 1-4-4v-2z"/><path d="M8 15H6a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3"/></svg></div>
           <h3>학생·학부모·강사 단톡방</h3>
           <p>3자 단톡방으로 실시간 일정 및 과제를 공유합니다. 팩트 기반 동기부여로 학생이 스스로 움직이게 만듭니다.</p>
         </div>
@@ -464,21 +468,21 @@
       <p class="section-sub">재원생에게 제공되는 AI 학습 도구들입니다. 계속 추가될 예정입니다.</p>
       <div class="services-grid">
         <div class="service-card active">
-          <span class="service-icon">🤖</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M9 13h.01M15 13h.01"/><path d="M12 8V5"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor" stroke="none"/><path d="M2 13h2M20 13h2"/></svg></span>
           <span class="service-badge badge-live">제공 중</span>
           <h3>수학 풀이 봇</h3>
           <p>순방향 태깅과 역방향 필연관계로 풀이 방향을 잡아주는 AI 봇. 정답이 아닌 사고 과정을 안내합니다.</p>
           <a href="solver.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 18px;background:rgba(255,255,255,.15);color:white;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">풀이봇 바로가기 →</a>
         </div>
         <div class="service-card active">
-          <span class="service-icon">📝</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>
           <span class="service-badge badge-live">제공 중</span>
           <h3>서술형 채점 AI</h3>
           <p>풀이를 입력하면 5단계로 분석합니다. 계산 실수 · 방향 오류 · 접근 불가 · 정답 · 모범 풀이 여부를 판단합니다.</p>
           <a href="grader.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 18px;background:rgba(255,255,255,.15);color:white;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">채점 AI 바로가기 →</a>
         </div>
         <div class="service-card coming">
-          <span class="service-icon">📓</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="15" height="18" rx="2"/><line x1="9" y1="8" x2="16" y2="8"/><line x1="9" y1="12" x2="16" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/><path d="M5 7h-1.5M5 11h-1.5M5 15h-1.5"/></svg></span>
           <span class="service-badge badge-soon">준비 중</span>
           <h3>오답노트 앱 연동</h3>
           <p>틀린 문제가 자동으로 쌓이고 분류되는 오답노트 앱. 매쓰홀릭과 연동해 약점 단원을 데이터로 파악합니다.</p>
