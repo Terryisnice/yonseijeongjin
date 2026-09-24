@@ -119,6 +119,8 @@
     .liveboard-gallery:hover .liveboard-track, .liveboard-track.paused { animation-play-state: paused; }
     .liveboard-track img { height: 170px; width: auto; flex-shrink: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); display: block; background: rgba(255,255,255,.05); }
     @keyframes liveboard-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .liveboard-download { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .liveboard-download-hint { position: relative; z-index: 1; display: block; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,.5); }
     @media (prefers-reduced-motion: reduce) {
       .liveboard-track { animation: none; }
       .liveboard-gallery { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
@@ -197,6 +199,8 @@
       .teacher-photo { width: 108px; height: 108px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .features-grid, .method-grid, .services-grid, .target-grid, .results-grid, .price-grid { grid-template-columns: 1fr; }
+      .method-grid > div:first-child { order: 2; }
+      .method-grid > .method-visual { order: 1; }
       .liveboard-track img { height: 130px; }
       .nav-links { display: none; }
       .footer-inner { flex-direction: column; }
@@ -367,6 +371,11 @@
               <img src="livebord04.png" alt="" aria-hidden="true" loading="lazy">
             </div>
           </div>
+          <div class="liveboard-download">
+            <a href="https://play.google.com/store/apps/details?id=com.inconceptlabs.liveboard" target="_blank" rel="noopener" class="btn-outline" style="font-size:12px;padding:8px 14px;">Android 다운로드</a>
+            <a href="https://apps.apple.com/us/app/whiteboard-by-liveboard/id1132607923" target="_blank" rel="noopener" class="btn-outline" style="font-size:12px;padding:8px 14px;">iPhone 다운로드</a>
+          </div>
+          <span class="liveboard-download-hint">구글 계정(추천)으로 간편하게 가입하실 수 있어요</span>
         </div>
       </div>
     </div>
