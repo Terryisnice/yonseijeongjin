@@ -57,6 +57,19 @@
 - [x] docs/prd.md 작성 (핵심 서비스 철학 + 기능 정의)
 - [x] docs/todo.md 작성
 
+### 익명화 (겸직 리스크 대응)
+- [x] "김태경 선생님" → "Terry쌤", "연세대/고려대 구체 전공" → "연고대 출신" 문구 통일
+      (index.html, docs/strategy.md, docs/prd.md)
+- [x] 선생님 사진 → circles.png 캐릭터 이미지로 교체
+
+### SEO
+- [x] index/solver/grader.html에 "(구 연세정진수학)" 병기
+- [x] solver.html, grader.html meta description/keywords 추가
+- [x] canonical 태그 추가 (index/solver/grader.html)
+- [x] Organization 구조화 데이터(JSON-LD, alternateName: 연세정진수학) 추가
+- [x] 예전 Netlify 사이트 → Vercel 301 리다이렉트 처리 (중복 색인 문제 해결)
+- [x] sitemap.xml lastmod 최신화
+
 ---
 
 ## 🔄 진행 중 / 확인 필요
@@ -68,6 +81,7 @@
 - [x] 히스토리 localStorage 용량 초과 시 에러 처리
 - [x] solver.html CSS lint 경고(line-clamp) 수정
 - [x] 풀이봇 ↔ 채점봇 상호 이동 링크 추가 (nav)
+- [ ] 구글 서치콘솔에서 index.html 표준 URL이 Vercel로 정상 전환됐는지 재확인 (며칠 소요)
 
 ---
 
@@ -83,6 +97,11 @@
 ---
 
 ## 📋 예정 (P2)
+
+### 디자인 개선
+- [ ] 이모지 아이콘(feature-icon, target-emoji 등) → 커스텀 SVG 아이콘 교체
+- [ ] method-visual(순방향/역방향 추상 박스) → 실제 라이브보드 실시간 풀이 화면(익명 처리)으로 교체
+- [ ] 최신 모의고사 문제 일반화 풀이법 콘텐츠 (블로그/칼럼 항목과 연결)
 
 ### SEO 강화
 - [ ] 각 페이지별 meta description 최적화
@@ -104,9 +123,9 @@
 ## 📋 예정 (P3)
 
 ### 유료화
-- [ ] Toss Payments 연동
-- [ ] 구독 플랜 설계 (월 9,900~29,900원)
-- [ ] 재원생 인증 시스템
+- [x] ~~Toss Payments 연동~~ → 결제선생(카카오 청구서 기반, 오프라인 결제 방식) 사용으로 결정, 사이트 변경 불필요
+- [ ] 구독 플랜 설계 (월 9,900~29,900원) — 방향 B 단계까지 보류
+- [ ] 재원생 인증 시스템 — 방향 B 단계까지 보류
 
 ---
 
