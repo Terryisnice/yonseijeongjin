@@ -279,7 +279,7 @@
 <!-- 문제+풀이 사진 sticky -->
 <div class="sticky-problem" id="stickyProblem">
   <div class="sticky-problem-top">
-    <div class="sticky-problem-label">📝 문제 + 풀이 사진</div>
+    <div class="sticky-problem-label" style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0;"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/></svg>문제 + 풀이 사진</div>
     <span style="font-size:11px;color:var(--gray-400)">탭하면 크게 볼 수 있어요</span>
   </div>
   <img id="stickyProblemImg" alt="문제+풀이" onclick="openModal()">
@@ -379,7 +379,7 @@
 
     <!-- 제출 -->
     <button class="btn-submit" id="submitBtn" onclick="submitGrading()" disabled>
-      <span>📝</span> 채점하기
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;flex-shrink:0;"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg> 채점하기
     </button>
 
     <div class="error-box" id="errorBox"><p id="errorMsg"></p></div>
