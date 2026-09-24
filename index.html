@@ -111,10 +111,16 @@
     .flow-box { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 14px 18px; }
     .flow-box-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; font-family: var(--mono); }
     .flow-box-content { font-size: 14px; color: var(--white); line-height: 1.5; }
-    .liveboard-gallery { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; position: relative; z-index: 1; padding-bottom: 6px; }
-    .liveboard-gallery img { height: 170px; width: auto; flex-shrink: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); scroll-snap-align: start; display: block; background: rgba(255,255,255,.05); }
-    .liveboard-gallery::-webkit-scrollbar { height: 6px; }
-    .liveboard-gallery::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 3px; }
+    .liveboard-gallery { overflow: hidden; position: relative; z-index: 1; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+    .liveboard-track { display: flex; gap: 12px; width: max-content; animation: liveboard-scroll 28s linear infinite; }
+    .liveboard-gallery:hover .liveboard-track, .liveboard-track.paused { animation-play-state: paused; }
+    .liveboard-track img { height: 170px; width: auto; flex-shrink: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); display: block; background: rgba(255,255,255,.05); }
+    @keyframes liveboard-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .liveboard-track { animation: none; }
+      .liveboard-gallery { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+      .liveboard-track img:nth-child(n+5) { display: none; }
+    }
     .flow-arrow { text-align: center; color: var(--accent); font-size: 18px; }
     .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .service-card { border-radius: 16px; padding: 32px; position: relative; overflow: hidden; }
@@ -188,7 +194,7 @@
       .teacher-photo { width: 108px; height: 108px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .features-grid, .method-grid, .services-grid, .target-grid, .results-grid, .price-grid { grid-template-columns: 1fr; }
-      .liveboard-gallery img { height: 130px; }
+      .liveboard-track img { height: 130px; }
       .nav-links { display: none; }
       .footer-inner { flex-direction: column; }
       .floating-ai-btn {
@@ -295,6 +301,70 @@
     </div>
   </div>
 
+  <section class="section" id="method">
+    <div class="container">
+      <div class="method-grid">
+        <div>
+          <span class="eyebrow">수업 방식</span>
+          <h2 class="section-title">한 문제를<br>완전히 이해할 때까지</h2>
+          <p class="section-sub" style="margin-bottom:40px">매 수업마다 같은 프로세스를 반복합니다. 방법이 몸에 배면 처음 보는 문제도 풀립니다.</p>
+          <div class="method-steps">
+            <div class="method-step">
+              <div class="step-num">01</div>
+              <div class="step-content">
+                <h4>개념서 기반 주간 계획</h4>
+                <p>학생 수준에 맞춘 체계적 주간 계획으로 진도를 관리합니다.</p>
+              </div>
+            </div>
+            <div class="method-step">
+              <div class="step-num">02</div>
+              <div class="step-content">
+                <h4>조건 태깅 → 역방향 필연관계</h4>
+                <p>순방향으로 조건을 태깅한 뒤 역방향으로 필연성을 검증합니다.</p>
+              </div>
+            </div>
+            <div class="method-step">
+              <div class="step-num">03</div>
+              <div class="step-content">
+                <h4>코칭식 문제 풀이</h4>
+                <p>최소한의 힌트로 학생 주도의 문제 해결을 유도합니다.</p>
+              </div>
+            </div>
+            <div class="method-step">
+              <div class="step-num">04</div>
+              <div class="step-content">
+                <h4>AI 채점 & 5단계 피드백</h4>
+                <p>계산 실수 / 방향 오류 / 접근 불가 / 정답 / 모범 풀이로 정밀 진단합니다.</p>
+              </div>
+            </div>
+            <div class="method-step">
+              <div class="step-num">05</div>
+              <div class="step-content">
+                <h4>매쓰홀릭 오답 유사 반복</h4>
+                <p>틀린 문제와 유사 문항을 무한 제공해 완벽히 알 때까지 반복합니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="method-visual">
+          <span class="visual-label">실제 라이브보드 수업 화면</span>
+          <div class="liveboard-gallery" id="liveboardGallery">
+            <div class="liveboard-track">
+              <img src="livebord01.png" alt="라이브보드 실시간 풀이 화면 1" loading="lazy">
+              <img src="livebord02.png" alt="라이브보드 실시간 풀이 화면 2" loading="lazy">
+              <img src="livebord03.png" alt="라이브보드 실시간 풀이 화면 3" loading="lazy">
+              <img src="livebord04.png" alt="라이브보드 실시간 풀이 화면 4" loading="lazy">
+              <img src="livebord01.png" alt="" aria-hidden="true" loading="lazy">
+              <img src="livebord02.png" alt="" aria-hidden="true" loading="lazy">
+              <img src="livebord03.png" alt="" aria-hidden="true" loading="lazy">
+              <img src="livebord04.png" alt="" aria-hidden="true" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="features">
     <div class="container">
       <span class="eyebrow">Triple Coaching System</span>
@@ -363,64 +433,6 @@
           <li>연세대 경제 — 이☺준</li>
           <li>+ 다수</li>
         </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="method">
-    <div class="container">
-      <div class="method-grid">
-        <div>
-          <span class="eyebrow">수업 방식</span>
-          <h2 class="section-title">한 문제를<br>완전히 이해할 때까지</h2>
-          <p class="section-sub" style="margin-bottom:40px">매 수업마다 같은 프로세스를 반복합니다. 방법이 몸에 배면 처음 보는 문제도 풀립니다.</p>
-          <div class="method-steps">
-            <div class="method-step">
-              <div class="step-num">01</div>
-              <div class="step-content">
-                <h4>개념서 기반 주간 계획</h4>
-                <p>학생 수준에 맞춘 체계적 주간 계획으로 진도를 관리합니다.</p>
-              </div>
-            </div>
-            <div class="method-step">
-              <div class="step-num">02</div>
-              <div class="step-content">
-                <h4>조건 태깅 → 역방향 필연관계</h4>
-                <p>순방향으로 조건을 태깅한 뒤 역방향으로 필연성을 검증합니다.</p>
-              </div>
-            </div>
-            <div class="method-step">
-              <div class="step-num">03</div>
-              <div class="step-content">
-                <h4>코칭식 문제 풀이</h4>
-                <p>최소한의 힌트로 학생 주도의 문제 해결을 유도합니다.</p>
-              </div>
-            </div>
-            <div class="method-step">
-              <div class="step-num">04</div>
-              <div class="step-content">
-                <h4>AI 채점 & 5단계 피드백</h4>
-                <p>계산 실수 / 방향 오류 / 접근 불가 / 정답 / 모범 풀이로 정밀 진단합니다.</p>
-              </div>
-            </div>
-            <div class="method-step">
-              <div class="step-num">05</div>
-              <div class="step-content">
-                <h4>매쓰홀릭 오답 유사 반복</h4>
-                <p>틀린 문제와 유사 문항을 무한 제공해 완벽히 알 때까지 반복합니다.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="method-visual">
-          <span class="visual-label">실제 라이브보드 수업 화면</span>
-          <div class="liveboard-gallery">
-            <img src="livebord01.png" alt="라이브보드 실시간 풀이 화면 1" loading="lazy">
-            <img src="livebord02.png" alt="라이브보드 실시간 풀이 화면 2" loading="lazy">
-            <img src="livebord03.png" alt="라이브보드 실시간 풀이 화면 3" loading="lazy">
-            <img src="livebord04.png" alt="라이브보드 실시간 풀이 화면 4" loading="lazy">
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -515,6 +527,17 @@
   </footer>
 
   <a href="#services" class="floating-ai-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M9 13h.01M15 13h.01"/><path d="M12 8V5"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor" stroke="none"/><path d="M2 13h2M20 13h2"/></svg>AI 도구 바로가기</a>
+
+  <script>
+    (function () {
+      var gallery = document.getElementById('liveboardGallery');
+      if (!gallery) return;
+      var track = gallery.querySelector('.liveboard-track');
+      gallery.addEventListener('touchstart', function () { track.classList.add('paused'); }, { passive: true });
+      gallery.addEventListener('touchend', function () { track.classList.remove('paused'); });
+      gallery.addEventListener('touchcancel', function () { track.classList.remove('paused'); });
+    })();
+  </script>
 
 </body>
 </html>
