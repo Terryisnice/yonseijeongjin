@@ -112,7 +112,7 @@
     .flow-box-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; font-family: var(--mono); }
     .flow-box-content { font-size: 14px; color: var(--white); line-height: 1.5; }
     .liveboard-gallery { overflow: hidden; position: relative; z-index: 1; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-    .liveboard-track { display: flex; gap: 12px; width: max-content; animation: liveboard-scroll 28s linear infinite; }
+    .liveboard-track { display: flex; gap: 12px; width: max-content; animation: liveboard-scroll 28s linear infinite; animation-play-state: running; }
     .liveboard-gallery:hover .liveboard-track, .liveboard-track.paused { animation-play-state: paused; }
     .liveboard-track img { height: 170px; width: auto; flex-shrink: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); display: block; background: rgba(255,255,255,.05); }
     @keyframes liveboard-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -228,9 +228,9 @@
         YK정진수학 <span class="nav-logo-alt">(구 연세정진수학)</span>
       </a>
       <ul class="nav-links">
+        <li><a href="#method">수업 방식</a></li>
         <li><a href="#features">수업 특징</a></li>
         <li><a href="#results">성과</a></li>
-        <li><a href="#method">수업 방식</a></li>
         <li><a href="#price">수강료</a></li>
         <li><a href="#services">AI 도구</a></li>
         <li><a href="solver.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-weight:700;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M9 13h.01M15 13h.01"/><path d="M12 8V5"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor" stroke="none"/><path d="M2 13h2M20 13h2"/></svg>풀이봇</a></li>
@@ -514,9 +514,9 @@
           <p>풀이가 맞아야 실력입니다.<br>맞은 문제도 틀린 문제도, 모든 풀이를 검토합니다.</p>
         </div>
         <div class="footer-links">
+          <a href="#method">수업 방식</a>
           <a href="#features">수업 특징</a>
           <a href="#results">성과</a>
-          <a href="#method">수업 방식</a>
           <a href="#price">수강료</a>
           <a href="#services">AI 학습 도구</a>
           <a href="https://open.kakao.com/o/s0srMpEi" target="_blank">카카오톡 상담</a>
