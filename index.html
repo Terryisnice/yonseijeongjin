@@ -70,6 +70,8 @@
     .hero h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); font-weight: 700; color: var(--white); line-height: 1.25; margin-bottom: 24px; }
     .hero h1 em { font-style: normal; color: var(--gold); }
     .hero-desc { font-size: 17px; color: rgba(255,255,255,.72); line-height: 1.75; margin-bottom: 40px; max-width: 480px; }
+    .hero-live-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(201,151,58,.14); border: 1px solid rgba(201,151,58,.35); color: var(--gold); font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 100px; margin-bottom: 32px; }
+    .hero-live-badge svg { width: 8px; height: 8px; flex-shrink: 0; }
     .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: var(--white); font-weight: 700; font-size: 15px; padding: 14px 28px; border-radius: var(--radius); text-decoration: none; transition: background .2s, transform .15s; }
     .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
@@ -275,6 +277,10 @@
           답이 아닌 <strong style="color:rgba(255,255,255,.9)">과정</strong>을 보는 수업 —<br>
           연고대 출신 · <strong style="color:rgba(255,255,255,.9)">대치동 20년</strong> · AI 교육
         </p>
+        <div class="hero-live-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+          라이브보드로 실시간 함께 풀며 코칭 — 다른 곳엔 없는 방식
+        </div>
         <div class="hero-actions">
           <a href="https://open.kakao.com/o/s0srMpEi" target="_blank" class="btn-kakao" style="font-size:15px;padding:14px 28px;">
             <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.52 5.08 3.84 6.56l-.98 3.64 4.2-2.77A11.4 11.4 0 0012 18.6c5.523 0 10-3.477 10-7.8S17.523 3 12 3z"/></svg>
